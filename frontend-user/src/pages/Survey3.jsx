@@ -103,8 +103,8 @@ function Survey3() {
 
   return (
     <div className="survey-container">
+      <button onClick={handleBack} className="back-survey-btn">返回主页</button>
       <div className="survey-content">
-        <button onClick={handleBack} className="back-survey-btn">返回主页</button>
         <div className="progress-bar">
           <div className="progress" style={{ width: `${((currentIndex + 1) / items.length) * 100}%` }}></div>
         </div>
