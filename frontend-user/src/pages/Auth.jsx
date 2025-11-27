@@ -39,6 +39,7 @@ function Auth() {
     setLoading(true)
     setError('')
     axios.post('/api/auth/send-code', { email }).then(res => {
+      setLoading(false)
       if (res.data.success) {
         setCodeSent(true)
         setCountdown(60)
@@ -49,11 +50,10 @@ function Auth() {
         }
       } else {
         setError(res.data.error || '发送失败')
-        setLoading(false)
       }
     }).catch(err => {
-      setError(err.response?.data?.error || err.message || '发送失败，请稍后重试')
       setLoading(false)
+      setError(err.response?.data?.error || err.message || '发送失败，请稍后重试')
     })
   }
 
