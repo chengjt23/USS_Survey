@@ -172,15 +172,10 @@ def extract_tar_file(tar_path, extract_to):
                         try:
                             with open(file_path, 'r', encoding='utf-8') as f:
                                 json_content = json.load(f)
-                                tags = None
                                 if isinstance(json_content, dict):
-                                    if 'sample_pool' in json_content and isinstance(json_content['sample_pool'], list):
-                                        tags = json_content['sample_pool']
+                                    tag_data[base_name] = json_content
                                 elif isinstance(json_content, list):
-                                    tags = json_content
-                                
-                                if tags:
-                                    tag_data[base_name] = tags
+                                    tag_data[base_name] = {'sample_pool': json_content}
                         except:
                             pass
     
@@ -401,7 +396,25 @@ def get_survey_items(survey_type):
             'audio': f"/api/audio/{survey_type}/{os.path.basename(row['audio_path'])}"
         }
         if row['tags']:
-            item['tags'] = json.loads(row['tags'])
+            tags_data = json.loads(row['tags'])
+            if survey_type == 2 and isinstance(tags_data, dict):
+                sample_pool = tags_data.get('sample_pool', [])
+                sample_selected = tags_data.get('sample_selected', '')
+                
+                options = []
+                if sample_selected and sample_selected in sample_pool:
+                    options.append(sample_selected)
+                
+                remaining_pool = [tag for tag in sample_pool if tag != sample_selected]
+                if len(remaining_pool) > 0:
+                    random.shuffle(remaining_pool)
+                    options.extend(remaining_pool[:2])
+                
+                options.append('都不是')
+                
+                item['tags'] = options[:4]
+            else:
+                item['tags'] = tags_data if isinstance(tags_data, list) else []
         items.append(item)
     
     conn.close()
