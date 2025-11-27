@@ -118,14 +118,19 @@ def allowed_tar_file(filename):
 
 def send_verification_code(email, code):
     try:
+        SMTP_HOST = 'smtp.gmail.com'
+        SMTP_PORT = 587
+        SMTP_USER = 'bianxing77@gmail.com'
+        SMTP_PASS = 'qajnzjeovhxsslhv'
+        
         msg = MIMEText(f'您的验证码是：{code}，有效期为10分钟。', 'plain', 'utf-8')
         msg['Subject'] = '问卷系统注册验证码'
-        msg['From'] = 'survey@example.com'
+        msg['From'] = SMTP_USER
         msg['To'] = email
         
-        smtp = smtplib.SMTP('smtp.gmail.com', 587)
+        smtp = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
         smtp.starttls()
-        smtp.login('your_email@gmail.com', 'your_password')
+        smtp.login(SMTP_USER, SMTP_PASS)
         smtp.send_message(msg)
         smtp.quit()
         return True

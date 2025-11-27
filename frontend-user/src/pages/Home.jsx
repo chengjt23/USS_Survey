@@ -49,7 +49,7 @@ function Home() {
   return (
     <div className="home">
       <div className="container">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div className="header-with-logout">
           <h1>问卷系统</h1>
           <button onClick={handleLogout} className="logout-btn">退出登录</button>
         </div>
