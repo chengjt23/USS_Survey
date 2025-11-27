@@ -1,15 +1,21 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, session
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import sqlite3
 import json
 import tarfile
-from datetime import datetime
+import smtplib
+import random
+import string
+from email.mime.text import MIMEText
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 app = Flask(__name__)
-CORS(app)
+app.secret_key = os.urandom(24)
+CORS(app, supports_credentials=True)
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a', 'flac'}
@@ -32,6 +38,25 @@ def get_db():
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS verification_codes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            code TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            expires_at TEXT NOT NULL
+        )
+    ''')
     
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS surveys (
@@ -59,9 +84,10 @@ def init_db():
             survey_id INTEGER NOT NULL,
             item_index INTEGER NOT NULL,
             answer TEXT NOT NULL,
-            user_id TEXT,
+            user_id INTEGER NOT NULL,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (survey_id) REFERENCES surveys(id)
+            FOREIGN KEY (survey_id) REFERENCES surveys(id),
+            FOREIGN KEY (user_id) REFERENCES users(id)
         )
     ''')
     
@@ -89,6 +115,28 @@ def allowed_tar_file(filename):
     if ext == 'gz':
         ext = filename.rsplit('.', 2)[-2].lower() + '.' + ext
     return ext in ALLOWED_TAR_EXTENSIONS
+
+def send_verification_code(email, code):
+    try:
+        msg = MIMEText(f'您的验证码是：{code}，有效期为10分钟。', 'plain', 'utf-8')
+        msg['Subject'] = '问卷系统注册验证码'
+        msg['From'] = 'survey@example.com'
+        msg['To'] = email
+        
+        smtp = smtplib.SMTP('smtp.gmail.com', 587)
+        smtp.starttls()
+        smtp.login('your_email@gmail.com', 'your_password')
+        smtp.send_message(msg)
+        smtp.quit()
+        return True
+    except:
+        return False
+
+def generate_code():
+    return ''.join(random.choices(string.digits, k=6))
+
+def get_current_user_id():
+    return session.get('user_id')
 
 def extract_tar_file(tar_path, extract_to):
     audio_files = []
@@ -123,6 +171,127 @@ def extract_tar_file(tar_path, extract_to):
     
     return audio_files, tag_data
 
+@app.route('/api/auth/send-code', methods=['POST'])
+def send_code():
+    data = request.json
+    email = data.get('email', '').strip().lower()
+    
+    if not email or '@' not in email:
+        return jsonify({'error': '邮箱格式不正确'}), 400
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+    if cursor.fetchone():
+        conn.close()
+        return jsonify({'error': '该邮箱已被注册'}), 400
+    
+    code = generate_code()
+    expires_at = (datetime.now() + timedelta(minutes=10)).isoformat()
+    
+    cursor.execute('''
+        INSERT INTO verification_codes (email, code, expires_at)
+        VALUES (?, ?, ?)
+    ''', (email, code, expires_at))
+    
+    conn.commit()
+    conn.close()
+    
+    if send_verification_code(email, code):
+        return jsonify({'success': True, 'message': '验证码已发送'})
+    else:
+        return jsonify({'success': True, 'message': '验证码已生成（模拟）', 'code': code})
+
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    data = request.json
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+    code = data.get('code', '')
+    
+    if not email or '@' not in email:
+        return jsonify({'error': '邮箱格式不正确'}), 400
+    
+    if len(password) < 6:
+        return jsonify({'error': '密码长度至少6位'}), 400
+    
+    if not code:
+        return jsonify({'error': '请输入验证码'}), 400
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+    if cursor.fetchone():
+        conn.close()
+        return jsonify({'error': '该邮箱已被注册'}), 400
+    
+    cursor.execute('''
+        SELECT code FROM verification_codes 
+        WHERE email = ? AND code = ? AND expires_at > datetime('now')
+        ORDER BY created_at DESC LIMIT 1
+    ''', (email, code))
+    
+    result = cursor.fetchone()
+    if not result:
+        conn.close()
+        return jsonify({'error': '验证码无效或已过期'}), 400
+    
+    password_hash = generate_password_hash(password)
+    cursor.execute('INSERT INTO users (email, password) VALUES (?, ?)', (email, password_hash))
+    user_id = cursor.lastrowid
+    
+    cursor.execute('DELETE FROM verification_codes WHERE email = ?', (email,))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': '注册成功'})
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    data = request.json
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+    
+    if not email or not password:
+        return jsonify({'error': '邮箱和密码不能为空'}), 400
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT id, password FROM users WHERE email = ?', (email,))
+    user = cursor.fetchone()
+    
+    if not user or not check_password_hash(user['password'], password):
+        conn.close()
+        return jsonify({'error': '邮箱或密码错误'}), 401
+    
+    session['user_id'] = user['id']
+    session['email'] = email
+    
+    conn.close()
+    return jsonify({'success': True, 'user_id': user['id'], 'email': email})
+
+@app.route('/api/auth/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'success': True})
+
+@app.route('/api/auth/check', methods=['GET'])
+def check_auth():
+    user_id = get_current_user_id()
+    if user_id:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, email FROM users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        conn.close()
+        if user:
+            return jsonify({'authenticated': True, 'user_id': user['id'], 'email': user['email']})
+    return jsonify({'authenticated': False})
+
 @app.route('/api/surveys/status', methods=['GET'])
 def get_survey_status():
     conn = get_db()
@@ -139,6 +308,10 @@ def get_survey_status():
 
 @app.route('/api/surveys/<int:survey_type>/items', methods=['GET'])
 def get_survey_items(survey_type):
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({'error': '请先登录'}), 401
+    
     conn = get_db()
     cursor = conn.cursor()
     
@@ -158,6 +331,15 @@ def get_survey_items(survey_type):
         return jsonify({'items': []})
     
     cursor.execute('''
+        SELECT COUNT(DISTINCT user_id) as count 
+        FROM responses r
+        JOIN surveys s ON r.survey_id = s.id
+        WHERE s.survey_type = ? AND r.user_id = ?
+    ''', (survey_type, user_id))
+    
+    has_completed = cursor.fetchone()['count'] > 0
+    
+    cursor.execute('''
         SELECT item_index, audio_path, tags 
         FROM survey_items 
         WHERE survey_id = ? 
@@ -175,13 +357,16 @@ def get_survey_items(survey_type):
         items.append(item)
     
     conn.close()
-    return jsonify({'items': items})
+    return jsonify({'items': items, 'has_completed': has_completed})
 
 @app.route('/api/surveys/<int:survey_type>/submit', methods=['POST'])
 def submit_survey(survey_type):
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({'error': '请先登录'}), 401
+    
     data = request.json
     answers = data.get('answers', [])
-    user_id = data.get('user_id', f'user_{datetime.now().timestamp()}')
     
     conn = get_db()
     cursor = conn.cursor()
@@ -193,6 +378,16 @@ def submit_survey(survey_type):
         conn.close()
         return jsonify({'error': '问卷不存在'}), 404
     
+    cursor.execute('''
+        SELECT COUNT(*) as count 
+        FROM responses r
+        WHERE r.survey_id = ? AND r.user_id = ?
+    ''', (survey['id'], user_id))
+    
+    if cursor.fetchone()['count'] > 0:
+        conn.close()
+        return jsonify({'error': '您已经填写过该问卷'}), 400
+    
     for answer in answers:
         cursor.execute('''
             INSERT INTO responses (survey_id, item_index, answer, user_id)
@@ -203,6 +398,27 @@ def submit_survey(survey_type):
     conn.close()
     
     return jsonify({'success': True})
+
+@app.route('/api/surveys/completed', methods=['GET'])
+def get_completed_surveys():
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({'completed': []})
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT DISTINCT s.survey_type
+        FROM responses r
+        JOIN surveys s ON r.survey_id = s.id
+        WHERE r.user_id = ?
+    ''', (user_id,))
+    
+    completed = [row['survey_type'] for row in cursor.fetchall()]
+    conn.close()
+    
+    return jsonify({'completed': completed})
 
 @app.route('/api/admin/stats', methods=['GET'])
 def get_stats():

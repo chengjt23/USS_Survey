@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axios from '../axiosConfig'
 import './Survey.css'
 
 function Survey2() {
@@ -13,6 +13,10 @@ function Survey2() {
 
   useEffect(() => {
     axios.get('/api/surveys/2/items').then(res => {
+      if (res.data.has_completed) {
+        navigate('/')
+        return
+      }
       setItems(res.data.items)
       setLoading(false)
     }).catch(() => {
