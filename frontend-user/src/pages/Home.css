@@ -1,9 +1,24 @@
 .home {
   min-height: 100vh;
   padding: 0;
-  background: linear-gradient(180deg, #2196F3 0%, #64B5F6 50%, #ffffff 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #E3F2FD 30%, #90CAF9 70%, #2196F3 100%);
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.home::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(33, 150, 243, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(33, 150, 243, 0.15) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .container {
@@ -14,66 +29,110 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
 .home h1 {
   text-align: center;
   padding-top: 80px;
   margin-bottom: 0;
-  color: white;
-  font-size: 3em;
-  font-weight: 700;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 3.5em;
+  font-weight: 800;
+  letter-spacing: -1px;
   flex-shrink: 0;
+  position: relative;
+}
+
+.home h1::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #2196F3, transparent);
+  border-radius: 2px;
 }
 
 .surveys-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 30px;
+  gap: 35px;
   flex: 1;
-  padding: 80px 0;
+  padding: 100px 0;
   margin: auto 0;
   align-content: center;
 }
 
 .survey-card {
-  background: white;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
   padding: 80px 50px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  box-shadow: 
+    0 20px 60px rgba(33, 150, 243, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   min-height: 500px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border: 2px solid transparent;
+  border: 2px solid rgba(33, 150, 243, 0.1);
+  overflow: hidden;
+}
+
+.survey-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #2196F3, #64B5F6, #2196F3);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .survey-card.active:hover {
-  transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  border-color: #667eea;
+  transform: translateY(-15px) scale(1.03);
+  box-shadow: 
+    0 30px 80px rgba(33, 150, 243, 0.25),
+    0 0 0 1px rgba(33, 150, 243, 0.2) inset;
+  border-color: rgba(33, 150, 243, 0.3);
+}
+
+.survey-card.active:hover::before {
+  transform: scaleX(1);
 }
 
 .survey-card.disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
-  background: #f5f5f5;
+  background: rgba(245, 245, 245, 0.9);
+  filter: grayscale(0.3);
 }
 
 .survey-card h2 {
-  color: #333;
+  color: #1565C0;
   margin-bottom: 30px;
-  font-size: 1.8em;
-  font-weight: 600;
-  line-height: 1.4;
+  font-size: 1.9em;
+  font-weight: 700;
+  line-height: 1.3;
+  position: relative;
+  z-index: 1;
 }
 
 .survey-card p {
-  color: #666;
+  color: #546E7A;
   line-height: 2;
   font-size: 1.15em;
   flex-grow: 1;
@@ -81,17 +140,30 @@
   align-items: center;
   text-align: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .status-badge {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 25px;
+  right: 25px;
   background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
   color: white;
-  padding: 8px 16px;
-  border-radius: 25px;
+  padding: 10px 20px;
+  border-radius: 30px;
   font-size: 0.85em;
   font-weight: 600;
-  box-shadow: 0 4px 10px rgba(255,107,107,0.3);
+  box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+  z-index: 2;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
