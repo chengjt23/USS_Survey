@@ -181,18 +181,25 @@ def extract_tar_file(tar_path, extract_to):
 def send_code():
     try:
         data = request.json
+        if not data:
+            return jsonify({'success': False, 'error': '请求数据为空', 'debug': 'no_data'}), 400
+        
         email = data.get('email', '').strip().lower()
         
-        if not email or '@' not in email:
-            return jsonify({'success': False, 'error': '邮箱格式不正确'}), 400
+        if not email:
+            return jsonify({'success': False, 'error': '邮箱不能为空', 'debug': 'empty_email', 'received': data}), 400
+        
+        if '@' not in email:
+            return jsonify({'success': False, 'error': '邮箱格式不正确', 'debug': 'invalid_format', 'email': email}), 400
         
         conn = get_db()
         cursor = conn.cursor()
         
         cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
-        if cursor.fetchone():
+        existing_user = cursor.fetchone()
+        if existing_user:
             conn.close()
-            return jsonify({'success': False, 'error': '该邮箱已被注册'}), 400
+            return jsonify({'success': False, 'error': '该邮箱已被注册', 'debug': 'email_exists'}), 400
         
         code = generate_code()
         expires_at = (datetime.now() + timedelta(minutes=10)).isoformat()
@@ -210,9 +217,16 @@ def send_code():
         if email_sent:
             return jsonify({'success': True, 'message': '验证码已发送到您的邮箱'})
         else:
-            return jsonify({'success': True, 'message': '验证码已生成（邮件发送失败，请使用以下验证码）', 'code': code})
+            return jsonify({'success': True, 'message': '验证码已生成（邮件发送失败，请使用以下验证码）', 'code': code, 'debug': 'email_send_failed'})
     except Exception as e:
-        return jsonify({'success': False, 'error': f'发送失败: {str(e)}'}), 500
+        import traceback
+        error_trace = traceback.format_exc()
+        return jsonify({
+            'success': False, 
+            'error': f'发送失败: {str(e)}', 
+            'debug': 'exception',
+            'traceback': error_trace
+        }), 500
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():

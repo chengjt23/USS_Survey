@@ -48,11 +48,30 @@ function Auth() {
           alert(res.data.message || '验证码已发送到您的邮箱，请查收')
         }
       } else {
-        setError(res.data.error || '发送失败')
+        const errorMsg = res.data.error || '发送失败'
+        const debugInfo = res.data.debug ? `\n调试信息: ${res.data.debug}` : ''
+        const fullError = `${errorMsg}${debugInfo}`
+        if (res.data.traceback) {
+          console.error('后端错误详情:', res.data.traceback)
+        }
+        alert(`错误: ${fullError}\n${res.data.traceback ? '详细错误信息已输出到控制台' : ''}`)
+        setError(errorMsg)
         setLoading(false)
       }
     }).catch(err => {
-      const errorMsg = err.response?.data?.error || err.message || '发送失败，请稍后重试'
+      const errorData = err.response?.data || {}
+      const errorMsg = errorData.error || err.message || '发送失败，请稍后重试'
+      const debugInfo = errorData.debug ? `\n调试信息: ${errorData.debug}` : ''
+      const receivedData = errorData.received ? `\n接收到的数据: ${JSON.stringify(errorData.received)}` : ''
+      const fullError = `错误: ${errorMsg}${debugInfo}${receivedData}`
+      
+      if (errorData.traceback) {
+        console.error('后端错误详情:', errorData.traceback)
+        alert(`${fullError}\n\n详细错误信息已输出到浏览器控制台（F12查看）`)
+      } else {
+        alert(fullError)
+      }
+      
       setError(errorMsg)
       setLoading(false)
     })
