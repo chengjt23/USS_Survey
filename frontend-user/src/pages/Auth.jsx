@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from '../axiosConfig'
 import './Auth.css'
@@ -13,6 +13,14 @@ function Auth() {
   const [countdown, setCountdown] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const shapePositions = useMemo(() => {
+    return Array.from({ length: 20 }, (_, i) => ({
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+      duration: 10 + Math.random() * 10
+    }))
+  }, [])
 
   useEffect(() => {
     axios.get('/api/auth/check').then(res => {
@@ -29,20 +37,23 @@ function Auth() {
     }
 
     setLoading(true)
+    setError('')
     axios.post('/api/auth/send-code', { email }).then(res => {
       if (res.data.success) {
         setCodeSent(true)
         setCountdown(60)
-        setError('')
         if (res.data.code) {
-          alert(`验证码（测试用）：${res.data.code}`)
+          alert(`验证码：${res.data.code}\n${res.data.message || ''}`)
+        } else {
+          alert(res.data.message || '验证码已发送到您的邮箱，请查收')
         }
       } else {
         setError(res.data.error || '发送失败')
+        setLoading(false)
       }
     }).catch(err => {
-      setError(err.response?.data?.error || '发送失败')
-    }).finally(() => {
+      const errorMsg = err.response?.data?.error || err.message || '发送失败，请稍后重试'
+      setError(errorMsg)
       setLoading(false)
     })
   }
@@ -96,11 +107,11 @@ function Auth() {
     <div className="auth-container">
       <div className="auth-background">
         <div className="floating-shapes">
-          {[...Array(20)].map((_, i) => (
+          {shapePositions.map((pos, i) => (
             <div key={i} className="shape" style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${10 + Math.random() * 10}s`
+              left: `${pos.left}%`,
+              animationDelay: `${pos.delay}s`,
+              animationDuration: `${pos.duration}s`
             }}></div>
           ))}
         </div>
@@ -152,10 +163,10 @@ function Auth() {
                   <button
                     type="button"
                     onClick={sendCode}
-                    disabled={codeSent && countdown > 0 || loading}
+                    disabled={(codeSent && countdown > 0) || loading}
                     className="send-code-btn"
                   >
-                    {countdown > 0 ? `${countdown}秒` : '发送验证码'}
+                    {countdown > 0 ? `${countdown}秒后重发` : '发送验证码'}
                   </button>
                 </div>
               </div>

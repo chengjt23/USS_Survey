@@ -129,7 +129,8 @@ def send_verification_code(email, code):
         smtp.send_message(msg)
         smtp.quit()
         return True
-    except:
+    except Exception as e:
+        print(f"邮件发送失败: {str(e)}")
         return False
 
 def generate_code():
@@ -173,35 +174,40 @@ def extract_tar_file(tar_path, extract_to):
 
 @app.route('/api/auth/send-code', methods=['POST'])
 def send_code():
-    data = request.json
-    email = data.get('email', '').strip().lower()
-    
-    if not email or '@' not in email:
-        return jsonify({'error': '邮箱格式不正确'}), 400
-    
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
-    if cursor.fetchone():
+    try:
+        data = request.json
+        email = data.get('email', '').strip().lower()
+        
+        if not email or '@' not in email:
+            return jsonify({'success': False, 'error': '邮箱格式不正确'}), 400
+        
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({'success': False, 'error': '该邮箱已被注册'}), 400
+        
+        code = generate_code()
+        expires_at = (datetime.now() + timedelta(minutes=10)).isoformat()
+        
+        cursor.execute('DELETE FROM verification_codes WHERE email = ?', (email,))
+        cursor.execute('''
+            INSERT INTO verification_codes (email, code, expires_at)
+            VALUES (?, ?, ?)
+        ''', (email, code, expires_at))
+        
+        conn.commit()
         conn.close()
-        return jsonify({'error': '该邮箱已被注册'}), 400
-    
-    code = generate_code()
-    expires_at = (datetime.now() + timedelta(minutes=10)).isoformat()
-    
-    cursor.execute('''
-        INSERT INTO verification_codes (email, code, expires_at)
-        VALUES (?, ?, ?)
-    ''', (email, code, expires_at))
-    
-    conn.commit()
-    conn.close()
-    
-    if send_verification_code(email, code):
-        return jsonify({'success': True, 'message': '验证码已发送'})
-    else:
-        return jsonify({'success': True, 'message': '验证码已生成（模拟）', 'code': code})
+        
+        email_sent = send_verification_code(email, code)
+        if email_sent:
+            return jsonify({'success': True, 'message': '验证码已发送到您的邮箱'})
+        else:
+            return jsonify({'success': True, 'message': '验证码已生成（邮件发送失败，请使用以下验证码）', 'code': code})
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'发送失败: {str(e)}'}), 500
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():
