@@ -46,12 +46,32 @@ function Home() {
     })
   }
 
+  const handleDeleteAccount = () => {
+    if (!window.confirm('确定要注销账户吗？此操作将永久删除您的账户和所有数据，且无法恢复！')) {
+      return
+    }
+    
+    if (!window.confirm('再次确认：注销账户后，您的所有问卷数据将被永久删除，此操作不可撤销！')) {
+      return
+    }
+    
+    axios.post('/api/auth/delete-account').then(() => {
+      alert('账户已成功注销')
+      navigate('/auth')
+    }).catch(err => {
+      alert(err.response?.data?.error || '注销失败')
+    })
+  }
+
   return (
     <div className="home">
       <div className="container">
         <div className="header-with-logout">
           <h1>问卷系统</h1>
-          <button onClick={handleLogout} className="logout-btn">退出登录</button>
+          <div className="user-actions">
+            <button onClick={handleLogout} className="logout-btn">退出登录</button>
+            <button onClick={handleDeleteAccount} className="delete-account-btn">注销账户</button>
+          </div>
         </div>
         <div className="surveys-grid">
           {surveys.map(survey => {

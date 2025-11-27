@@ -184,6 +184,13 @@
   flex: 1;
 }
 
+.user-actions {
+  position: absolute;
+  right: 0;
+  display: flex;
+  gap: 10px;
+}
+
 .logout-btn {
   padding: 12px 24px;
   background: rgba(0, 0, 0, 0.6);
@@ -195,8 +202,6 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
-  position: absolute;
-  right: 0;
 }
 
 .logout-btn:hover {
@@ -204,6 +209,26 @@
   border-color: rgba(0, 0, 0, 0.5);
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.delete-account-btn {
+  padding: 12px 24px;
+  background: rgba(244, 67, 54, 0.8);
+  color: white;
+  border: 2px solid rgba(244, 67, 54, 0.5);
+  border-radius: 10px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.delete-account-btn:hover {
+  background: rgba(244, 67, 54, 1);
+  border-color: rgba(244, 67, 54, 0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
 }
 
 @keyframes pulse {
