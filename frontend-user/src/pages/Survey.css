@@ -1,0 +1,192 @@
+.survey-container {
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.survey-content {
+  max-width: 800px;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background: #4CAF50;
+  transition: width 0.3s;
+}
+
+.question-info {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 1.1em;
+}
+
+.audio-section {
+  margin-bottom: 40px;
+}
+
+.audio-section h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+  text-align: center;
+}
+
+.audio-player {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.answer-section {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.answer-btn {
+  flex: 1;
+  padding: 20px;
+  font-size: 1.2em;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.answer-btn:hover {
+  border-color: #4CAF50;
+  background: #f0f8f0;
+}
+
+.answer-btn.selected {
+  border-color: #4CAF50;
+  background: #4CAF50;
+  color: white;
+}
+
+.tags-section {
+  margin-top: 30px;
+}
+
+.tags-section h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.tags-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+}
+
+.tag-btn {
+  padding: 15px;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1em;
+}
+
+.tag-btn:hover {
+  border-color: #2196F3;
+  background: #f0f7ff;
+}
+
+.tag-btn.selected {
+  border-color: #2196F3;
+  background: #2196F3;
+  color: white;
+}
+
+.mos-info {
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.mos-info h2 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.mos-info p {
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.mos-info ul {
+  color: #666;
+  padding-left: 20px;
+  line-height: 1.8;
+}
+
+.mos-section {
+  margin-top: 30px;
+}
+
+.mos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.mos-btn {
+  padding: 20px;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.mos-btn:hover {
+  border-color: #FF9800;
+  background: #fff8f0;
+}
+
+.mos-btn.selected {
+  border-color: #FF9800;
+  background: #FF9800;
+  color: white;
+}
+
+.completion-message {
+  text-align: center;
+  color: #4CAF50;
+  font-size: 1.2em;
+  margin-top: 30px;
+  padding: 20px;
+  background: #f0f8f0;
+  border-radius: 8px;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.5em;
+  color: #666;
+  padding: 40px;
+}
