@@ -6,10 +6,14 @@ import './Home.css'
 function Home() {
   const navigate = useNavigate()
   const [status, setStatus] = useState({})
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     axios.get('/api/surveys/status').then(res => {
       setStatus(res.data)
+      setLoading(false)
+    }).catch(() => {
+      setLoading(false)
     })
   }, [])
 
@@ -19,22 +23,33 @@ function Home() {
     { id: 3, title: '问卷3：音频质量评判', desc: '100个音频，使用MOS分数评判音频质量' }
   ]
 
+  const isSurveyActive = (surveyId) => {
+    const surveyKey = `survey${surveyId}`
+    if (loading || status[surveyKey] === undefined) {
+      return true
+    }
+    return status[surveyKey] === true
+  }
+
   return (
     <div className="home">
       <div className="container">
         <h1>问卷系统</h1>
         <div className="surveys-grid">
-          {surveys.map(survey => (
-            <div 
-              key={survey.id} 
-              className={`survey-card ${status[`survey${survey.id}`] ? 'active' : 'disabled'}`}
-              onClick={() => status[`survey${survey.id}`] && navigate(`/survey${survey.id}`)}
-            >
-              <h2>{survey.title}</h2>
-              <p>{survey.desc}</p>
-              {!status[`survey${survey.id}`] && <span className="status-badge">已暂停</span>}
-            </div>
-          ))}
+          {surveys.map(survey => {
+            const isActive = isSurveyActive(survey.id)
+            return (
+              <div 
+                key={survey.id} 
+                className={`survey-card ${isActive ? 'active' : 'disabled'}`}
+                onClick={() => isActive && navigate(`/survey${survey.id}`)}
+              >
+                <h2>{survey.title}</h2>
+                <p>{survey.desc}</p>
+                {!loading && !isActive && <span className="status-badge">已暂停</span>}
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
