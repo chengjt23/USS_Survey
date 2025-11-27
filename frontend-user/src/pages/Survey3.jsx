@@ -9,6 +9,7 @@ function Survey3() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(true)
+  const [audioFinished, setAudioFinished] = useState(false)
   const audioRef = useRef(null)
 
   useEffect(() => {
@@ -20,20 +21,34 @@ function Survey3() {
     })
   }, [navigate])
 
+  useEffect(() => {
+    setAudioFinished(false)
+    if (audioRef.current) {
+      const audio = audioRef.current
+      const handleEnded = () => {
+        setAudioFinished(true)
+      }
+      audio.addEventListener('ended', handleEnded)
+      return () => {
+        audio.removeEventListener('ended', handleEnded)
+      }
+    }
+  }, [currentIndex])
+
   const mosScores = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 
   const handleAnswer = (answer) => {
+    if (!audioFinished) return
+    
     const newAnswers = { ...answers, [currentIndex]: answer }
     setAnswers(newAnswers)
     
     if (currentIndex < items.length - 1) {
-      setTimeout(() => {
-        setCurrentIndex(currentIndex + 1)
-        if (audioRef.current) {
-          audioRef.current.pause()
-          audioRef.current.currentTime = 0
-        }
-      }, 300)
+      setCurrentIndex(currentIndex + 1)
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
     } else {
       submitSurvey(newAnswers)
     }
@@ -103,6 +118,8 @@ function Survey3() {
                 key={score}
                 className={`mos-btn ${answers[currentIndex] === score.toString() ? 'selected' : ''}`}
                 onClick={() => handleAnswer(score.toString())}
+                disabled={!audioFinished}
+                style={{ opacity: audioFinished ? 1 : 0.5, cursor: audioFinished ? 'pointer' : 'not-allowed' }}
               >
                 {score}
               </button>
