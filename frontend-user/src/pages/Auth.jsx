@@ -44,9 +44,7 @@ function Auth() {
         setCodeSent(true)
         setCountdown(60)
         if (res.data.code) {
-          alert(`验证码：${res.data.code}\n${res.data.message || ''}`)
-        } else {
-          alert(res.data.message || '验证码已发送到您的邮箱，请查收')
+          setError(`验证码：${res.data.code}`)
         }
       } else {
         setError(res.data.error || '发送失败')
@@ -77,7 +75,6 @@ function Auth() {
       setCode('')
       setCodeSent(false)
       setError('')
-      alert('注册成功，请登录')
     }).catch(err => {
       setError(err.response?.data?.error || '注册失败')
     }).finally(() => {
