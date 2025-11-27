@@ -402,13 +402,17 @@ def get_survey_items(survey_type):
                 sample_selected = tags_data.get('sample_selected', '')
                 
                 options = []
-                if sample_selected and sample_selected in sample_pool:
+                
+                if sample_selected:
                     options.append(sample_selected)
                 
                 remaining_pool = [tag for tag in sample_pool if tag != sample_selected]
-                if len(remaining_pool) > 0:
+                
+                if len(remaining_pool) > 2:
                     random.shuffle(remaining_pool)
                     options.extend(remaining_pool[:2])
+                else:
+                    options.extend(remaining_pool)
                 
                 options.append('都不是')
                 
