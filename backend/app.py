@@ -251,28 +251,35 @@ def export_data():
     
     if survey_type:
         cursor.execute('''
-            SELECT r.item_index, r.answer, r.user_id, r.created_at
+            SELECT r.item_index, r.answer, r.user_id, r.created_at, si.audio_path
             FROM responses r
             JOIN surveys s ON r.survey_id = s.id
+            LEFT JOIN survey_items si ON r.survey_id = si.survey_id AND r.item_index = si.item_index
             WHERE s.survey_type = ?
             ORDER BY r.created_at, r.item_index
         ''', (survey_type,))
     else:
         cursor.execute('''
-            SELECT s.survey_type, r.item_index, r.answer, r.user_id, r.created_at
+            SELECT s.survey_type, r.item_index, r.answer, r.user_id, r.created_at, si.audio_path
             FROM responses r
             JOIN surveys s ON r.survey_id = s.id
+            LEFT JOIN survey_items si ON r.survey_id = si.survey_id AND r.item_index = si.item_index
             ORDER BY s.survey_type, r.created_at, r.item_index
         ''')
     
     results = cursor.fetchall()
     data = []
     for row in results:
+        audio_file_name = None
+        if row['audio_path']:
+            audio_file_name = os.path.basename(row['audio_path'])
+        
         item = {
             'item_index': row['item_index'],
             'answer': row['answer'],
             'user_id': row['user_id'],
-            'created_at': row['created_at']
+            'created_at': row['created_at'],
+            'audio_file_name': audio_file_name
         }
         if not survey_type:
             item['survey_type'] = row['survey_type']
