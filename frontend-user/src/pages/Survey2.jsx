@@ -9,7 +9,6 @@ function Survey2() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(true)
-  const [audioFinished, setAudioFinished] = useState(false)
   const audioRef = useRef(null)
 
   useEffect(() => {
@@ -21,23 +20,7 @@ function Survey2() {
     })
   }, [navigate])
 
-  useEffect(() => {
-    setAudioFinished(false)
-    if (audioRef.current) {
-      const audio = audioRef.current
-      const handleEnded = () => {
-        setAudioFinished(true)
-      }
-      audio.addEventListener('ended', handleEnded)
-      return () => {
-        audio.removeEventListener('ended', handleEnded)
-      }
-    }
-  }, [currentIndex])
-
   const handleAnswer = (answer) => {
-    if (!audioFinished) return
-    
     const newAnswers = { ...answers, [currentIndex]: answer }
     setAnswers(newAnswers)
     
@@ -107,8 +90,6 @@ function Survey2() {
                 key={idx}
                 className={`tag-btn ${answers[currentIndex] === tag ? 'selected' : ''}`}
                 onClick={() => handleAnswer(tag)}
-                disabled={!audioFinished}
-                style={{ opacity: audioFinished ? 1 : 0.5, cursor: audioFinished ? 'pointer' : 'not-allowed' }}
               >
                 {tag}
               </button>
@@ -116,8 +97,6 @@ function Survey2() {
             <button
               className={`tag-btn ${answers[currentIndex] === '都不是' ? 'selected' : ''}`}
               onClick={() => handleAnswer('都不是')}
-              disabled={!audioFinished}
-              style={{ opacity: audioFinished ? 1 : 0.5, cursor: audioFinished ? 'pointer' : 'not-allowed' }}
             >
               都不是
             </button>

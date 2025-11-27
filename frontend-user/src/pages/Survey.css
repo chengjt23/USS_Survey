@@ -181,17 +181,6 @@
   transform: translateY(-5px);
 }
 
-.answer-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.answer-btn:disabled:hover {
-  transform: none;
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
-}
-
 .tags-section {
   margin-top: 40px;
 }
@@ -240,17 +229,6 @@
   color: white;
   box-shadow: 0 10px 30px rgba(33,150,243,0.4);
   transform: translateY(-4px);
-}
-
-.tag-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.tag-btn:disabled:hover {
-  transform: none;
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
 }
 
 .mos-info {
@@ -326,17 +304,6 @@
   color: white;
   box-shadow: 0 12px 35px rgba(33, 150, 243, 0.4);
   transform: translateY(-5px);
-}
-
-.mos-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.mos-btn:disabled:hover {
-  transform: none;
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
 }
 
 .completion-message {
