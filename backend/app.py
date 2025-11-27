@@ -171,8 +171,15 @@ def extract_tar_file(tar_path, extract_to):
                         base_name = os.path.splitext(os.path.basename(member.name))[0]
                         try:
                             with open(file_path, 'r', encoding='utf-8') as f:
-                                tags = json.load(f)
-                                if isinstance(tags, list):
+                                json_content = json.load(f)
+                                tags = None
+                                if isinstance(json_content, dict):
+                                    if 'sample_pool' in json_content and isinstance(json_content['sample_pool'], list):
+                                        tags = json_content['sample_pool']
+                                elif isinstance(json_content, list):
+                                    tags = json_content
+                                
+                                if tags:
                                     tag_data[base_name] = tags
                         except:
                             pass
