@@ -133,12 +133,6 @@ function Survey2() {
                 {tag}
               </button>
             ))}
-            <button
-              className={`tag-btn ${answers[currentIndex] === '都不是' ? 'selected' : ''}`}
-              onClick={() => handleAnswer('都不是')}
-            >
-              都不是
-            </button>
           </div>
         </div>
 

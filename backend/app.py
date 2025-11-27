@@ -397,26 +397,32 @@ def get_survey_items(survey_type):
         }
         if row['tags']:
             tags_data = json.loads(row['tags'])
-            if survey_type == 2 and isinstance(tags_data, dict):
-                sample_pool = tags_data.get('sample_pool', [])
-                sample_selected = tags_data.get('sample_selected', '')
-                
-                options = []
-                
-                if sample_selected:
-                    options.append(sample_selected)
-                
-                remaining_pool = [tag for tag in sample_pool if tag != sample_selected]
-                
-                if len(remaining_pool) > 2:
-                    random.shuffle(remaining_pool)
-                    options.extend(remaining_pool[:2])
+            if survey_type == 2:
+                if isinstance(tags_data, dict):
+                    sample_pool = tags_data.get('sample_pool', [])
+                    sample_selected = tags_data.get('sample_selected', '')
+                    
+                    options = []
+                    
+                    if sample_selected:
+                        options.append(sample_selected)
+                    
+                    remaining_pool = [tag for tag in sample_pool if tag != sample_selected]
+                    
+                    max_remaining = 2
+                    if len(remaining_pool) > max_remaining:
+                        random.shuffle(remaining_pool)
+                        options.extend(remaining_pool[:max_remaining])
+                    else:
+                        options.extend(remaining_pool)
+                    
+                    options.append('都不是')
+                    
+                    item['tags'] = options[:4]
+                elif isinstance(tags_data, list):
+                    item['tags'] = tags_data[:4] if len(tags_data) > 4 else tags_data
                 else:
-                    options.extend(remaining_pool)
-                
-                options.append('都不是')
-                
-                item['tags'] = options[:4]
+                    item['tags'] = []
             else:
                 item['tags'] = tags_data if isinstance(tags_data, list) else []
         items.append(item)
