@@ -4,184 +4,231 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .survey-content {
-  max-width: 800px;
+  max-width: 900px;
   width: 100%;
   background: white;
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 24px;
+  padding: 50px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
 
 .progress-bar {
   width: 100%;
-  height: 8px;
+  height: 12px;
   background: #e0e0e0;
-  border-radius: 4px;
-  margin-bottom: 30px;
+  border-radius: 10px;
+  margin-bottom: 35px;
   overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .progress {
   height: 100%;
-  background: #4CAF50;
-  transition: width 0.3s;
+  background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(76,175,80,0.3);
 }
 
 .question-info {
   text-align: center;
   color: #666;
-  margin-bottom: 30px;
-  font-size: 1.1em;
+  margin-bottom: 35px;
+  font-size: 1.2em;
+  font-weight: 500;
 }
 
 .audio-section {
-  margin-bottom: 40px;
+  margin-bottom: 50px;
+  padding: 30px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16px;
 }
 
 .audio-section h2 {
   color: #333;
-  margin-bottom: 20px;
-  font-size: 1.3em;
+  margin-bottom: 25px;
+  font-size: 1.4em;
   text-align: center;
+  font-weight: 600;
 }
 
 .audio-player {
   width: 100%;
   margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .answer-section {
   display: flex;
-  gap: 20px;
+  gap: 25px;
   justify-content: center;
+  margin: 40px 0;
 }
 
 .answer-btn {
   flex: 1;
-  padding: 20px;
-  font-size: 1.2em;
-  border: 2px solid #ddd;
+  padding: 35px 30px;
+  font-size: 1.4em;
+  font-weight: 600;
+  border: 3px solid #e0e0e0;
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .answer-btn:hover {
   border-color: #4CAF50;
-  background: #f0f8f0;
+  background: linear-gradient(135deg, #f0f8f0 0%, #e8f5e9 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(76,175,80,0.2);
 }
 
 .answer-btn.selected {
   border-color: #4CAF50;
-  background: #4CAF50;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
+  box-shadow: 0 8px 25px rgba(76,175,80,0.4);
+  transform: translateY(-3px);
 }
 
 .tags-section {
-  margin-top: 30px;
+  margin-top: 40px;
 }
 
 .tags-section h3 {
   color: #333;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+  font-weight: 600;
 }
 
 .tags-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 20px;
 }
 
 .tag-btn {
-  padding: 15px;
-  border: 2px solid #ddd;
+  padding: 25px 20px;
+  border: 3px solid #e0e0e0;
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s;
-  font-size: 1em;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.1em;
+  font-weight: 500;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tag-btn:hover {
   border-color: #2196F3;
-  background: #f0f7ff;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(33,150,243,0.2);
 }
 
 .tag-btn.selected {
   border-color: #2196F3;
-  background: #2196F3;
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
   color: white;
+  box-shadow: 0 8px 25px rgba(33,150,243,0.4);
+  transform: translateY(-3px);
 }
 
 .mos-info {
-  background: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  padding: 30px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+  border-left: 5px solid #FF9800;
+  box-shadow: 0 4px 15px rgba(255,152,0,0.1);
 }
 
 .mos-info h2 {
   color: #333;
-  margin-bottom: 15px;
-  font-size: 1.2em;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+  font-weight: 600;
 }
 
 .mos-info p {
   color: #666;
-  margin-bottom: 15px;
-  line-height: 1.6;
+  margin-bottom: 20px;
+  line-height: 1.8;
+  font-size: 1.05em;
 }
 
 .mos-info ul {
   color: #666;
-  padding-left: 20px;
-  line-height: 1.8;
+  padding-left: 25px;
+  line-height: 2;
+  font-size: 1.05em;
 }
 
 .mos-section {
-  margin-top: 30px;
+  margin-top: 40px;
 }
 
 .mos-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  gap: 20px;
 }
 
 .mos-btn {
-  padding: 20px;
-  border: 2px solid #ddd;
+  padding: 35px 25px;
+  border: 3px solid #e0e0e0;
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   cursor: pointer;
-  transition: all 0.3s;
-  font-size: 1.3em;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.5em;
   font-weight: bold;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mos-btn:hover {
   border-color: #FF9800;
-  background: #fff8f0;
+  background: linear-gradient(135deg, #fff8f0 0%, #ffe0b2 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255,152,0,0.2);
 }
 
 .mos-btn.selected {
   border-color: #FF9800;
-  background: #FF9800;
+  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
   color: white;
+  box-shadow: 0 8px 25px rgba(255,152,0,0.4);
+  transform: translateY(-3px);
 }
 
 .completion-message {
   text-align: center;
   color: #4CAF50;
-  font-size: 1.2em;
-  margin-top: 30px;
-  padding: 20px;
-  background: #f0f8f0;
-  border-radius: 8px;
+  font-size: 1.3em;
+  font-weight: 600;
+  margin-top: 40px;
+  padding: 30px;
+  background: linear-gradient(135deg, #f0f8f0 0%, #e8f5e9 100%);
+  border-radius: 16px;
+  border: 2px solid #4CAF50;
+  box-shadow: 0 4px 15px rgba(76,175,80,0.2);
 }
 
 .loading {
