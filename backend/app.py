@@ -305,6 +305,70 @@ def toggle_survey(survey_type):
     
     return jsonify({'is_active': bool(new_status)})
 
+@app.route('/api/admin/survey/<int:survey_type>/has-data', methods=['GET'])
+def has_survey_data(survey_type):
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT id FROM surveys WHERE survey_type = ? ORDER BY id DESC LIMIT 1', (survey_type,))
+    survey = cursor.fetchone()
+    
+    if not survey:
+        conn.close()
+        return jsonify({'has_data': False})
+    
+    cursor.execute('SELECT COUNT(*) as count FROM survey_items WHERE survey_id = ?', (survey['id'],))
+    item_count = cursor.fetchone()['count']
+    
+    cursor.execute('SELECT COUNT(*) as count FROM responses WHERE survey_id = ?', (survey['id'],))
+    response_count = cursor.fetchone()['count']
+    
+    conn.close()
+    return jsonify({'has_data': item_count > 0 or response_count > 0})
+
+@app.route('/api/admin/survey/<int:survey_type>/reset', methods=['POST'])
+def reset_survey(survey_type):
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT id FROM surveys WHERE survey_type = ? ORDER BY id DESC LIMIT 1', (survey_type,))
+    survey = cursor.fetchone()
+    
+    if not survey:
+        conn.close()
+        return jsonify({'error': '问卷不存在'}), 404
+    
+    survey_id = survey['id']
+    
+    cursor.execute('SELECT audio_path FROM survey_items WHERE survey_id = ?', (survey_id,))
+    audio_files = cursor.fetchall()
+    
+    import shutil
+    for row in audio_files:
+        audio_path = row['audio_path']
+        if os.path.exists(audio_path):
+            try:
+                os.remove(audio_path)
+            except:
+                pass
+    
+    cursor.execute('DELETE FROM responses WHERE survey_id = ?', (survey_id,))
+    cursor.execute('DELETE FROM survey_items WHERE survey_id = ?', (survey_id,))
+    cursor.execute('DELETE FROM surveys WHERE id = ?', (survey_id,))
+    
+    upload_dir = os.path.join(UPLOAD_FOLDER, f'survey{survey_type}')
+    if os.path.exists(upload_dir):
+        try:
+            shutil.rmtree(upload_dir)
+            os.makedirs(upload_dir, exist_ok=True)
+        except:
+            pass
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
 @app.route('/api/admin/survey/<int:survey_type>/upload', methods=['POST'])
 def upload_audio(survey_type):
     if 'file' not in request.files:
@@ -319,6 +383,13 @@ def upload_audio(survey_type):
     
     cursor.execute('SELECT id FROM surveys WHERE survey_type = ? ORDER BY id DESC LIMIT 1', (survey_type,))
     survey = cursor.fetchone()
+    
+    if survey:
+        cursor.execute('SELECT COUNT(*) as count FROM survey_items WHERE survey_id = ?', (survey['id'],))
+        item_count = cursor.fetchone()['count']
+        if item_count > 0:
+            conn.close()
+            return jsonify({'error': '问卷已有数据，请先重置后再上传'}), 400
     
     if not survey:
         cursor.execute('INSERT INTO surveys (survey_type) VALUES (?)', (survey_type,))

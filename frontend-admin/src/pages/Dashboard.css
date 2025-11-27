@@ -59,7 +59,7 @@
   gap: 10px;
 }
 
-.toggle-btn, .manage-btn, .export-btn {
+.toggle-btn, .manage-btn, .reset-btn, .export-btn {
   padding: 12px 24px;
   border: none;
   border-radius: 10px;
@@ -85,12 +85,17 @@
   color: white;
 }
 
+.reset-btn {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: white;
+}
+
 .export-btn {
   background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
   color: white;
 }
 
-.toggle-btn:hover, .manage-btn:hover, .export-btn:hover {
+.toggle-btn:hover, .manage-btn:hover, .reset-btn:hover, .export-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(0,0,0,0.2);
 }
