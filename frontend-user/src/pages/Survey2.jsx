@@ -122,7 +122,6 @@ function Survey2() {
         </div>
 
         <div className="tags-section">
-          <h3>标签池：</h3>
           <div className="tags-grid">
             {tags.map((tag, idx) => (
               <button

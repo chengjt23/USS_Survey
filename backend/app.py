@@ -409,7 +409,7 @@ def get_survey_items(survey_type):
                     
                     remaining_pool = [tag for tag in sample_pool if tag != sample_selected]
                     
-                    max_remaining = 2
+                    max_remaining = 3 - len(options)
                     if len(remaining_pool) > max_remaining:
                         random.shuffle(remaining_pool)
                         options.extend(remaining_pool[:max_remaining])
@@ -418,7 +418,7 @@ def get_survey_items(survey_type):
                     
                     options.append('都不是')
                     
-                    item['tags'] = options[:4]
+                    item['tags'] = options
                 elif isinstance(tags_data, list):
                     item['tags'] = tags_data[:4] if len(tags_data) > 4 else tags_data
                 else:
