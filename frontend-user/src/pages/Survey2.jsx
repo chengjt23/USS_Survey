@@ -9,6 +9,7 @@ function Survey2() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const audioRef = useRef(null)
   const STORAGE_KEY = 'survey2_progress'
 
@@ -47,6 +48,12 @@ function Survey2() {
   const handleAnswer = (answer) => {
     const newAnswers = { ...answers, [currentIndex]: answer }
     setAnswers(newAnswers)
+  }
+
+  const handleNext = () => {
+    if (!answers[currentIndex]) {
+      return
+    }
     
     if (currentIndex < items.length - 1) {
       setCurrentIndex(currentIndex + 1)
@@ -55,7 +62,7 @@ function Survey2() {
         audioRef.current.currentTime = 0
       }
     } else {
-      submitSurvey(newAnswers)
+      submitSurvey(answers)
     }
   }
 
@@ -78,6 +85,7 @@ function Survey2() {
   }
 
   const submitSurvey = (finalAnswers) => {
+    setSubmitting(true)
     const answerArray = Object.keys(finalAnswers).map(index => ({
       index: parseInt(index),
       answer: finalAnswers[index]
@@ -95,6 +103,8 @@ function Survey2() {
       setTimeout(() => {
         navigate('/')
       }, 2000)
+    }).catch(() => {
+      setSubmitting(false)
     })
   }
 
@@ -154,9 +164,16 @@ function Survey2() {
           >
             上一题
           </button>
+          <button 
+            onClick={handleNext} 
+            className="next-btn"
+            disabled={!answers[currentIndex] || submitting}
+          >
+            {submitting ? '提交中...' : (isLast ? '提交' : '下一题')}
+          </button>
         </div>
 
-        {isLast && answers[currentIndex] && (
+        {submitting && (
           <div className="completion-message">
             问卷已完成！正在提交...
           </div>
