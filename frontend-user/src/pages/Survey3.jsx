@@ -142,8 +142,9 @@ function Survey3() {
                 onClick={() => handleAnswer(score.toString())}
                 title={score}
               >
-                <span className="mos-circle"></span>
-                <span className="mos-label">{score}</span>
+                <span className="mos-circle">
+                  <span className="mos-label">{score}</span>
+                </span>
               </button>
             ))}
           </div>

@@ -271,15 +271,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px;
+  gap: 18px;
   flex-wrap: wrap;
 }
 
 .mos-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
   padding: 0;
   border: none;
   background: transparent;
@@ -288,47 +284,46 @@
 }
 
 .mos-circle {
-  width: 36px;
-  height: 36px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  border: 2.5px solid rgba(33, 150, 243, 0.4);
+  border: 3px solid rgba(33, 150, 243, 0.4);
   background: white;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+  box-shadow: 0 3px 10px rgba(33, 150, 243, 0.2);
 }
 
 .mos-label {
-  font-size: 0.85em;
-  font-weight: 600;
+  font-size: 1.1em;
+  font-weight: 700;
   color: #1565C0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1;
 }
 
 .mos-btn:hover .mos-circle {
   border-color: #2196F3;
   background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-  transform: scale(1.15);
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  transform: scale(1.1);
+  box-shadow: 0 5px 15px rgba(33, 150, 243, 0.35);
 }
 
 .mos-btn:hover .mos-label {
   color: #0D47A1;
-  font-weight: 700;
 }
 
 .mos-btn.selected .mos-circle {
   border-color: #2196F3;
   background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  transform: scale(1.2);
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.5);
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
 }
 
 .mos-btn.selected .mos-label {
-  color: #2196F3;
-  font-weight: 700;
+  color: white;
 }
 
 .completion-message {
