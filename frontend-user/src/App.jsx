@@ -5,15 +5,26 @@ import Survey1 from './pages/Survey1'
 import Survey2 from './pages/Survey2'
 import Survey3 from './pages/Survey3'
 
+function PrivateRoute({ children }) {
+  const name = localStorage.getItem('user_name')
+  const email = localStorage.getItem('user_email')
+  
+  if (!name || !email) {
+    return <Navigate to="/auth" replace />
+  }
+  
+  return children
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/auth" element={<Auth />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/survey1" element={<Survey1 />} />
-        <Route path="/survey2" element={<Survey2 />} />
-        <Route path="/survey3" element={<Survey3 />} />
+        <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
+        <Route path="/survey1" element={<PrivateRoute><Survey1 /></PrivateRoute>} />
+        <Route path="/survey2" element={<PrivateRoute><Survey2 /></PrivateRoute>} />
+        <Route path="/survey3" element={<PrivateRoute><Survey3 /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   )
