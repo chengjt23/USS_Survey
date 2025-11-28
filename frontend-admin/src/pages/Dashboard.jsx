@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import './Dashboard.css'
 
 function Dashboard() {
@@ -60,8 +59,6 @@ function Dashboard() {
   if (loading) {
     return <div className="dashboard"><div className="loading">加载中...</div></div>
   }
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
   return (
     <div className="dashboard">
@@ -122,30 +119,6 @@ function Dashboard() {
                     </div>
                   </div>
                 </div>
-
-                {Object.keys(surveyStats.answers || {}).length > 0 && (
-                  <div className="chart-section">
-                    <h3>答案分布统计</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={Object.entries(surveyStats.answers).map(([item, answers]) => ({
-                        item: `题目${item}`,
-                        ...Object.entries(answers).reduce((acc, [key, value]) => {
-                          acc[key] = value
-                          return acc
-                        }, {})
-                      })).slice(0, 10)}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="item" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        {Object.keys(surveyStats.answers[Object.keys(surveyStats.answers)[0]] || {}).map((key, idx) => (
-                          <Bar key={key} dataKey={key} fill={COLORS[idx % COLORS.length]} maxBarSize={80} />
-                        ))}
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
               </div>
             )
           })}
