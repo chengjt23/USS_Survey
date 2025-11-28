@@ -9,16 +9,12 @@ function Survey3() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const audioRef = useRef(null)
   const STORAGE_KEY = 'survey3_progress'
 
   useEffect(() => {
     axios.get('/api/surveys/3/items').then(res => {
-      if (res.data.has_completed) {
-        localStorage.removeItem(STORAGE_KEY)
-        navigate('/')
-        return
-      }
       setItems(res.data.items)
       
       const savedProgress = localStorage.getItem(STORAGE_KEY)
@@ -41,7 +37,7 @@ function Survey3() {
   }, [navigate])
 
   useEffect(() => {
-    if (items.length > 0 && Object.keys(answers).length > 0) {
+    if (items.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         currentIndex,
         answers
@@ -54,6 +50,12 @@ function Survey3() {
   const handleAnswer = (answer) => {
     const newAnswers = { ...answers, [currentIndex]: answer }
     setAnswers(newAnswers)
+  }
+
+  const handleNext = () => {
+    if (!answers[currentIndex]) {
+      return
+    }
     
     if (currentIndex < items.length - 1) {
       setCurrentIndex(currentIndex + 1)
@@ -62,7 +64,17 @@ function Survey3() {
         audioRef.current.currentTime = 0
       }
     } else {
-      submitSurvey(newAnswers)
+      submitSurvey(answers)
+    }
+  }
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1)
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
     }
   }
 
@@ -75,18 +87,26 @@ function Survey3() {
   }
 
   const submitSurvey = (finalAnswers) => {
+    setSubmitting(true)
     const answerArray = Object.keys(finalAnswers).map(index => ({
       index: parseInt(index),
       answer: finalAnswers[index]
     }))
     
+    const name = sessionStorage.getItem('user_name')
+    const email = sessionStorage.getItem('user_email')
+    
     axios.post('/api/surveys/3/submit', {
-      answers: answerArray
+      answers: answerArray,
+      name: name,
+      email: email
     }).then(() => {
       localStorage.removeItem(STORAGE_KEY)
       setTimeout(() => {
         navigate('/')
       }, 2000)
+    }).catch(() => {
+      setSubmitting(false)
     })
   }
 
@@ -100,6 +120,7 @@ function Survey3() {
 
   const currentItem = items[currentIndex]
   const isLast = currentIndex === items.length - 1
+  const isFirst = currentIndex === 0
 
   return (
     <div className="survey-container">
@@ -150,7 +171,24 @@ function Survey3() {
           </div>
         </div>
 
-        {isLast && answers[currentIndex] && (
+        <div className="navigation-buttons">
+          <button 
+            onClick={handlePrevious} 
+            className="previous-btn"
+            disabled={isFirst}
+          >
+            上一题
+          </button>
+          <button 
+            onClick={handleNext} 
+            className="next-btn"
+            disabled={!answers[currentIndex] || submitting}
+          >
+            {submitting ? '提交中...' : (isLast ? '提交' : '下一题')}
+          </button>
+        </div>
+
+        {submitting && (
           <div className="completion-message">
             问卷已完成！正在提交...
           </div>
