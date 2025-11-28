@@ -7,17 +7,17 @@
 ├── backend/              # Flask后端
 │   ├── app.py           # 主应用文件
 │   ├── requirements.txt  # Python依赖
-│   ├── uploads/         # 音频文件存储目录（自动创建）
-│   └── data/            # 问卷数据目录
-│       ├── data_1.tar   # 问卷1数据文件
-│       ├── data_2.tar   # 问卷2数据文件
-│       └── data_3.tar   # 问卷3数据文件
-├── frontend-user/       # 用户端前端（React）
+│   └── uploads/          # 音频文件存储目录（自动创建）
+├── data/                 # 问卷数据目录
+│   ├── data_1.tar        # 问卷1数据文件
+│   ├── data_2.tar       # 问卷2数据文件
+│   └── data_3.tar       # 问卷3数据文件
+├── frontend-user/        # 用户端前端（React）
 │   ├── src/
 │   ├── package.json
 │   └── vite.config.js
-└── output_data/         # 问卷结果输出目录（自动创建）
-    └── {email}/         # 按邮箱分组的用户结果
+└── output_data/          # 问卷结果输出目录（自动创建）
+    └── {email}/          # 按邮箱分组的用户结果
         ├── survey_1.json
         ├── survey_2.json
         └── survey_3.json
@@ -55,7 +55,7 @@ python app.py
 
 后端服务将在 `http://localhost:5000` 启动。
 
-首次运行时会自动解压tar文件到`uploads/`目录。
+首次运行时会自动解压tar文件到`backend/uploads/`目录。
 
 ### 3. 前端部署
 
@@ -189,9 +189,9 @@ JSON格式示例：
 ## 注意事项
 
 1. 确保后端服务在启动前端之前运行
-2. 数据文件必须放在`data/`目录下，命名为`data_1.tar`、`data_2.tar`、`data_3.tar`
+2. 数据文件必须放在项目根目录的`data/`目录下（与`backend/`目录同级），命名为`data_1.tar`、`data_2.tar`、`data_3.tar`
 3. 音频文件支持格式：wav, flac
-4. 问卷结果自动保存到`output_data/`目录，按邮箱分组
+4. 问卷结果自动保存到项目根目录的`output_data/`目录，按邮箱分组
 5. 用户可以重复填写任意问卷
 6. 生产环境建议使用HTTPS
 7. 建议定期备份`output_data/`目录
@@ -210,7 +210,7 @@ JSON格式示例：
 - 检查CORS设置
 
 ### 音频文件无法播放
-- 检查数据文件是否正确解压
+- 检查数据文件是否正确解压到`backend/uploads/`目录
 - 检查文件格式是否支持
 - 检查文件路径是否正确
 - 检查文件权限
