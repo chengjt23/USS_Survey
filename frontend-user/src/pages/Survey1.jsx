@@ -13,12 +13,15 @@ function Survey1() {
   const STORAGE_KEY = 'survey1_progress'
 
   useEffect(() => {
+    const name = localStorage.getItem('user_name')
+    const email = localStorage.getItem('user_email')
+    
+    if (!name || !email) {
+      navigate('/auth')
+      return
+    }
+
     axios.get('/api/surveys/1/items').then(res => {
-      if (res.data.has_completed) {
-        localStorage.removeItem(STORAGE_KEY)
-        navigate('/')
-        return
-      }
       setItems(res.data.items)
       
       const savedProgress = localStorage.getItem(STORAGE_KEY)
@@ -41,7 +44,7 @@ function Survey1() {
   }, [navigate])
 
   useEffect(() => {
-    if (items.length > 0 && Object.keys(answers).length > 0) {
+    if (items.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         currentIndex,
         answers
@@ -64,6 +67,16 @@ function Survey1() {
     }
   }
 
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1)
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
+    }
+  }
+
   const handleBack = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       currentIndex,
@@ -78,8 +91,13 @@ function Survey1() {
       answer: finalAnswers[index]
     }))
     
+    const name = localStorage.getItem('user_name')
+    const email = localStorage.getItem('user_email')
+    
     axios.post('/api/surveys/1/submit', {
-      answers: answerArray
+      answers: answerArray,
+      name: name,
+      email: email
     }).then(() => {
       localStorage.removeItem(STORAGE_KEY)
       setTimeout(() => {
@@ -98,6 +116,7 @@ function Survey1() {
 
   const currentItem = items[currentIndex]
   const isLast = currentIndex === items.length - 1
+  const isFirst = currentIndex === 0
 
   return (
     <div className="survey-container">
@@ -132,6 +151,16 @@ function Survey1() {
             onClick={() => handleAnswer('否')}
           >
             否
+          </button>
+        </div>
+
+        <div className="navigation-buttons">
+          <button 
+            onClick={handlePrevious} 
+            className="previous-btn"
+            disabled={isFirst}
+          >
+            上一题
           </button>
         </div>
 
