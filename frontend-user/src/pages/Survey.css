@@ -267,43 +267,63 @@
   margin-top: 40px;
 }
 
-.mos-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+.mos-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
 }
 
 .mos-btn {
-  padding: 40px 30px;
-  border: 3px solid rgba(33, 150, 243, 0.2);
-  background: white;
-  border-radius: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 1.6em;
-  font-weight: bold;
-  min-height: 110px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mos-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid rgba(33, 150, 243, 0.4);
+  background: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1565C0;
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
+  box-shadow: 0 3px 10px rgba(33, 150, 243, 0.2);
 }
 
-.mos-btn:hover {
+.mos-label {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: #1565C0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1;
+}
+
+.mos-btn:hover .mos-circle {
   border-color: #2196F3;
   background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(33, 150, 243, 0.25);
+  transform: scale(1.1);
+  box-shadow: 0 5px 15px rgba(33, 150, 243, 0.35);
+}
+
+.mos-btn:hover .mos-label {
   color: #0D47A1;
 }
 
-.mos-btn.selected {
+.mos-btn.selected .mos-circle {
   border-color: #2196F3;
   background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
+}
+
+.mos-btn.selected .mos-label {
   color: white;
-  box-shadow: 0 12px 35px rgba(33, 150, 243, 0.4);
-  transform: translateY(-5px);
 }
 
 .completion-message {
