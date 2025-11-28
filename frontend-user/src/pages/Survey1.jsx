@@ -93,13 +93,11 @@ function Survey1() {
     
     const name = sessionStorage.getItem('user_name')
     const email = sessionStorage.getItem('user_email')
-    const signature = sessionStorage.getItem('user_signature') || ''
     
     axios.post('/api/surveys/1/submit', {
       answers: answerArray,
       name: name,
-      email: email,
-      signature: signature
+      email: email
     }).then(() => {
       localStorage.removeItem(STORAGE_KEY)
       setTimeout(() => {
