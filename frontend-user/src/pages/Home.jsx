@@ -42,6 +42,9 @@ function Home() {
 
   const handleLogout = () => {
     axios.post('/api/auth/logout').then(() => {
+      localStorage.removeItem('survey1_progress')
+      localStorage.removeItem('survey2_progress')
+      localStorage.removeItem('survey3_progress')
       navigate('/auth')
     })
   }
@@ -56,6 +59,9 @@ function Home() {
     }
     
     axios.post('/api/auth/delete-account').then(() => {
+      localStorage.removeItem('survey1_progress')
+      localStorage.removeItem('survey2_progress')
+      localStorage.removeItem('survey3_progress')
       alert('账户已成功注销')
       navigate('/auth')
     }).catch(err => {
