@@ -85,55 +85,6 @@ npm run dev
 
 用户端将在 `http://localhost:3000` 启动。
 
-### 4. 生产环境部署
-
-#### 4.1 后端生产部署
-
-推荐使用Gunicorn：
-
-```bash
-pip install gunicorn
-cd backend
-gunicorn -w 4 -b 0.0.0.0:5000 app:app
-```
-
-#### 4.2 前端生产部署
-
-构建后的文件在`dist`目录，可以使用Nginx等Web服务器部署：
-
-```bash
-cd frontend-user
-npm run build
-# 将dist目录内容部署到Web服务器
-```
-
-#### 4.3 Nginx配置示例
-
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    # 前端
-    location / {
-        root /path/to/frontend-user/dist;
-        try_files $uri $uri/ /index.html;
-    }
-
-    # API代理
-    location /api {
-        proxy_pass http://localhost:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    # 音频文件
-    location /api/audio {
-        proxy_pass http://localhost:5000;
-    }
-}
-```
-
 ## 使用说明
 
 ### 用户使用流程
@@ -196,37 +147,3 @@ JSON格式示例：
   ]
 }
 ```
-
-## 注意事项
-
-1. 确保后端服务在启动前端之前运行
-2. 数据文件必须放在项目根目录的`data/`目录下（与`backend/`目录同级），命名为`data_1.tar`、`data_2.tar`、`data_3.tar`
-3. 音频文件支持格式：wav, flac
-4. 问卷结果自动保存到项目根目录的`output_data/`目录，按邮箱分组
-5. 用户可以重复填写任意问卷
-6. 生产环境建议使用HTTPS
-7. 建议定期备份`output_data/`目录
-
-## 故障排除
-
-### 后端无法启动
-- 检查Python版本是否符合要求
-- 检查端口5000是否被占用
-- 检查依赖是否安装完整
-- 检查`data/`目录下是否存在数据文件
-
-### 前端无法连接后端
-- 检查后端服务是否运行
-- 检查vite.config.js中的proxy配置
-- 检查CORS设置
-
-### 音频文件无法播放
-- 检查数据文件是否正确解压到`backend/uploads/`目录
-- 检查文件格式是否支持
-- 检查文件路径是否正确
-- 检查文件权限
-
-### 问卷数据无法加载
-- 检查`data/`目录下是否存在对应的tar文件
-- 检查tar文件格式是否正确
-- 检查tar文件是否包含音频文件
