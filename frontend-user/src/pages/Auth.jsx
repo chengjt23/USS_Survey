@@ -1,11 +1,14 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import SignaturePad from '../components/SignaturePad'
 import './Auth.css'
 
 function Auth() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [signature, setSignature] = useState('')
+  const [hasSignature, setHasSignature] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -16,6 +19,11 @@ function Auth() {
       duration: 10 + Math.random() * 10
     }))
   }, [])
+
+  const handleSignatureChange = (svgData, hasSig) => {
+    setSignature(svgData)
+    setHasSignature(hasSig)
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -29,12 +37,18 @@ function Auth() {
       return
     }
 
+    if (!hasSignature) {
+      setError('请完成签名')
+      return
+    }
+
     localStorage.removeItem('survey1_progress')
     localStorage.removeItem('survey2_progress')
     localStorage.removeItem('survey3_progress')
     
     sessionStorage.setItem('user_name', name)
     sessionStorage.setItem('user_email', email)
+    sessionStorage.setItem('user_signature', signature)
     navigate('/')
   }
 
@@ -81,6 +95,8 @@ function Auth() {
                 required
               />
             </div>
+
+            <SignaturePad onSignatureChange={handleSignatureChange} />
 
             {error && <div className="error-message">{error}</div>}
 

@@ -156,6 +156,7 @@ def submit_survey(survey_type):
     answers = data.get('answers', [])
     email = data.get('email', '')
     name = data.get('name', '')
+    signature = data.get('signature', '')
     
     if not email:
         return jsonify({'error': '邮箱不能为空'}), 400
@@ -184,6 +185,11 @@ def submit_survey(survey_type):
     output_file = os.path.join(email_dir, f'survey_{survey_type}.json')
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
+    
+    if signature:
+        signature_file = os.path.join(email_dir, 'signature.svg')
+        with open(signature_file, 'w', encoding='utf-8') as f:
+            f.write(signature)
     
     return jsonify({'success': True})
 
