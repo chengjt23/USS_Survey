@@ -123,29 +123,35 @@ function Dashboard() {
                   </div>
                 </div>
 
-                {Object.keys(surveyStats.answers || {}).length > 0 && (
-                  <div className="chart-section">
-                    <h3>答案分布统计</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={Object.entries(surveyStats.answers).map(([item, answers]) => ({
-                        item: `题目${item}`,
-                        ...Object.entries(answers).reduce((acc, [key, value]) => {
-                          acc[key] = value
-                          return acc
-                        }, {})
-                      })).slice(0, 10)}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="item" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        {Object.keys(surveyStats.answers[Object.keys(surveyStats.answers)[0]] || {}).map((key, idx) => (
-                          <Bar key={key} dataKey={key} fill={COLORS[idx % COLORS.length]} maxBarSize={80} />
-                        ))}
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
+                {Object.keys(surveyStats.answers || {}).length > 0 && (() => {
+                  const allAnswerKeys = new Set()
+                  Object.values(surveyStats.answers || {}).forEach(answers => {
+                    Object.keys(answers).forEach(key => allAnswerKeys.add(key))
+                  })
+                  return (
+                    <div className="chart-section">
+                      <h3>答案分布统计</h3>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={Object.entries(surveyStats.answers).map(([item, answers]) => ({
+                          item: `题目${item}`,
+                          ...Object.entries(answers).reduce((acc, [key, value]) => {
+                            acc[key] = value
+                            return acc
+                          }, {})
+                        })).slice(0, 10)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="item" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          {Array.from(allAnswerKeys).map((key, idx) => (
+                            <Bar key={key} dataKey={key} fill={COLORS[idx % COLORS.length]} maxBarSize={80} />
+                          ))}
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )
+                })()}
               </div>
             )
           })}
