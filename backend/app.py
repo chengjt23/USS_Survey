@@ -711,29 +711,51 @@ def upload_audio(survey_type):
             
             audio_files.sort(key=lambda x: x['name'])
             
+            batch_size = 20
             for idx, audio_info in enumerate(audio_files):
-                audio_name = audio_info['name']
-                base_name = os.path.splitext(audio_name)[0]
-                
-                final_path = os.path.join(app.config['UPLOAD_FOLDER'], f'survey{survey_type}', audio_name)
-                os.makedirs(os.path.dirname(final_path), exist_ok=True)
-                os.rename(audio_info['path'], final_path)
-                
-                item_tags = None
-                if survey_type == 2:
-                    if base_name in tag_data:
-                        item_tags = tag_data[base_name]
-                    else:
-                        return jsonify({'error': f'音频文件 {audio_name} 缺少对应的json标签文件'}), 400
-                
-                tags_json = json.dumps(item_tags) if item_tags else None
-                
-                cursor.execute('''
-                    INSERT INTO survey_items (survey_id, item_index, audio_path, tags)
-                    VALUES (?, ?, ?, ?)
-                ''', (survey_id, idx, final_path, tags_json))
-                
-                uploaded_files.append(audio_name)
+                try:
+                    audio_name = audio_info['name']
+                    base_name = os.path.splitext(audio_name)[0]
+                    
+                    final_path = os.path.join(app.config['UPLOAD_FOLDER'], f'survey{survey_type}', audio_name)
+                    os.makedirs(os.path.dirname(final_path), exist_ok=True)
+                    
+                    if not os.path.exists(audio_info['path']):
+                        raise Exception(f'源文件不存在: {audio_info["path"]}')
+                    
+                    if os.path.exists(final_path):
+                        os.remove(final_path)
+                    
+                    os.rename(audio_info['path'], final_path)
+                    
+                    item_tags = None
+                    if survey_type == 2:
+                        if base_name in tag_data:
+                            item_tags = tag_data[base_name]
+                        else:
+                            conn.rollback()
+                            conn.close()
+                            import shutil
+                            shutil.rmtree(temp_dir, ignore_errors=True)
+                            return jsonify({'error': f'音频文件 {audio_name} 缺少对应的json标签文件'}), 400
+                    
+                    tags_json = json.dumps(item_tags) if item_tags else None
+                    
+                    cursor.execute('''
+                        INSERT INTO survey_items (survey_id, item_index, audio_path, tags)
+                        VALUES (?, ?, ?, ?)
+                    ''', (survey_id, idx, final_path, tags_json))
+                    
+                    uploaded_files.append(audio_name)
+                    
+                    if (idx + 1) % batch_size == 0:
+                        conn.commit()
+                except Exception as e:
+                    conn.rollback()
+                    conn.close()
+                    import shutil
+                    shutil.rmtree(temp_dir, ignore_errors=True)
+                    return jsonify({'error': f'处理文件 {audio_info.get("name", "未知")} 时出错: {str(e)}'}), 500
             
             import shutil
             shutil.rmtree(temp_dir, ignore_errors=True)
