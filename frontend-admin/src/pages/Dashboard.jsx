@@ -43,6 +43,20 @@ function Dashboard() {
     })
   }
 
+  const resetSurvey = (surveyType) => {
+    if (!window.confirm(`确定要重置问卷${surveyType}的所有数据吗？此操作将删除所有音频文件和收集的答案数据，且无法恢复！`)) {
+      return
+    }
+    
+    axios.post(`/api/admin/survey/${surveyType}/reset`).then(() => {
+      alert('重置成功')
+      loadData()
+    }).catch((err) => {
+      const errorMsg = err.response?.data?.error || '重置失败'
+      alert(errorMsg)
+    })
+  }
+
   if (loading) {
     return <div className="dashboard"><div className="loading">加载中...</div></div>
   }
@@ -75,7 +89,13 @@ function Dashboard() {
                       className="manage-btn"
                       onClick={() => navigate(`/manage/${type}`)}
                     >
-                      管理
+                      上传数据
+                    </button>
+                    <button 
+                      className="reset-btn"
+                      onClick={() => resetSurvey(type)}
+                    >
+                      重置
                     </button>
                     <button 
                       className="export-btn"
@@ -120,7 +140,7 @@ function Dashboard() {
                         <Tooltip />
                         <Legend />
                         {Object.keys(surveyStats.answers[Object.keys(surveyStats.answers)[0]] || {}).map((key, idx) => (
-                          <Bar key={key} dataKey={key} fill={COLORS[idx % COLORS.length]} />
+                          <Bar key={key} dataKey={key} fill={COLORS[idx % COLORS.length]} maxBarSize={80} />
                         ))}
                       </BarChart>
                     </ResponsiveContainer>

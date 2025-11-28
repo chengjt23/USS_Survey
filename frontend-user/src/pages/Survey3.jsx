@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axios from '../axiosConfig'
 import './Survey.css'
 
 function Survey3() {
@@ -10,15 +10,44 @@ function Survey3() {
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(true)
   const audioRef = useRef(null)
+  const STORAGE_KEY = 'survey3_progress'
 
   useEffect(() => {
     axios.get('/api/surveys/3/items').then(res => {
+      if (res.data.has_completed) {
+        localStorage.removeItem(STORAGE_KEY)
+        navigate('/')
+        return
+      }
       setItems(res.data.items)
+      
+      const savedProgress = localStorage.getItem(STORAGE_KEY)
+      if (savedProgress) {
+        try {
+          const progress = JSON.parse(savedProgress)
+          if (progress.currentIndex !== undefined && progress.answers) {
+            setCurrentIndex(progress.currentIndex)
+            setAnswers(progress.answers)
+          }
+        } catch (e) {
+          console.error('恢复进度失败:', e)
+        }
+      }
+      
       setLoading(false)
     }).catch(() => {
       navigate('/')
     })
   }, [navigate])
+
+  useEffect(() => {
+    if (items.length > 0 && Object.keys(answers).length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        currentIndex,
+        answers
+      }))
+    }
+  }, [currentIndex, answers, items.length])
 
   const mosScores = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 
@@ -27,16 +56,22 @@ function Survey3() {
     setAnswers(newAnswers)
     
     if (currentIndex < items.length - 1) {
-      setTimeout(() => {
-        setCurrentIndex(currentIndex + 1)
-        if (audioRef.current) {
-          audioRef.current.pause()
-          audioRef.current.currentTime = 0
-        }
-      }, 300)
+      setCurrentIndex(currentIndex + 1)
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
     } else {
       submitSurvey(newAnswers)
     }
+  }
+
+  const handleBack = () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      currentIndex,
+      answers
+    }))
+    navigate('/')
   }
 
   const submitSurvey = (finalAnswers) => {
@@ -48,6 +83,7 @@ function Survey3() {
     axios.post('/api/surveys/3/submit', {
       answers: answerArray
     }).then(() => {
+      localStorage.removeItem(STORAGE_KEY)
       setTimeout(() => {
         navigate('/')
       }, 2000)
@@ -67,6 +103,7 @@ function Survey3() {
 
   return (
     <div className="survey-container">
+      <button onClick={handleBack} className="back-survey-btn">返回主页</button>
       <div className="survey-content">
         <div className="progress-bar">
           <div className="progress" style={{ width: `${((currentIndex + 1) / items.length) * 100}%` }}></div>
