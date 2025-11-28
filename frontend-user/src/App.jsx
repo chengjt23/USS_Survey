@@ -6,8 +6,8 @@ import Survey2 from './pages/Survey2'
 import Survey3 from './pages/Survey3'
 
 function PrivateRoute({ children }) {
-  const name = localStorage.getItem('user_name')
-  const email = localStorage.getItem('user_email')
+  const name = sessionStorage.getItem('user_name')
+  const email = sessionStorage.getItem('user_email')
   
   if (!name || !email) {
     return <Navigate to="/auth" replace />

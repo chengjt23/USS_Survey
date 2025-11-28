@@ -13,14 +13,6 @@ function Survey2() {
   const STORAGE_KEY = 'survey2_progress'
 
   useEffect(() => {
-    const name = localStorage.getItem('user_name')
-    const email = localStorage.getItem('user_email')
-    
-    if (!name || !email) {
-      navigate('/auth')
-      return
-    }
-
     axios.get('/api/surveys/2/items').then(res => {
       setItems(res.data.items)
       
@@ -91,8 +83,8 @@ function Survey2() {
       answer: finalAnswers[index]
     }))
     
-    const name = localStorage.getItem('user_name')
-    const email = localStorage.getItem('user_email')
+    const name = sessionStorage.getItem('user_name')
+    const email = sessionStorage.getItem('user_email')
     
     axios.post('/api/surveys/2/submit', {
       answers: answerArray,

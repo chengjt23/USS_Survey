@@ -29,8 +29,12 @@ function Auth() {
       return
     }
 
-    localStorage.setItem('user_name', name)
-    localStorage.setItem('user_email', email)
+    localStorage.removeItem('survey1_progress')
+    localStorage.removeItem('survey2_progress')
+    localStorage.removeItem('survey3_progress')
+    
+    sessionStorage.setItem('user_name', name)
+    sessionStorage.setItem('user_email', email)
     navigate('/')
   }
 

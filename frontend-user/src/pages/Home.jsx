@@ -1,8 +1,15 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import './Home.css'
 
 function Home() {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    localStorage.removeItem('survey1_progress')
+    localStorage.removeItem('survey2_progress')
+    localStorage.removeItem('survey3_progress')
+  }, [])
 
   const surveys = [
     { id: 1, title: '问卷1：单事件音频判断', desc: '50个音频，每个音频判断是否只包含一个音频事件' },
