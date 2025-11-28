@@ -9,16 +9,17 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-DATA_FOLDER = 'data'
-OUTPUT_FOLDER = 'output_data'
-UPLOAD_FOLDER = 'uploads'
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_FOLDER = os.path.join(BASE_DIR, 'data')
+OUTPUT_FOLDER = os.path.join(BASE_DIR, 'output_data')
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs('uploads/survey1', exist_ok=True)
-os.makedirs('uploads/survey2', exist_ok=True)
-os.makedirs('uploads/survey3', exist_ok=True)
+os.makedirs(os.path.join(UPLOAD_FOLDER, 'survey1'), exist_ok=True)
+os.makedirs(os.path.join(UPLOAD_FOLDER, 'survey2'), exist_ok=True)
+os.makedirs(os.path.join(UPLOAD_FOLDER, 'survey3'), exist_ok=True)
 
 survey_data_cache = {}
 
