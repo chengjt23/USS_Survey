@@ -134,14 +134,16 @@ function Survey3() {
         </div>
 
         <div className="mos-section">
-          <div className="mos-grid">
+          <div className="mos-row">
             {mosScores.map(score => (
               <button
                 key={score}
                 className={`mos-btn ${answers[currentIndex] === score.toString() ? 'selected' : ''}`}
                 onClick={() => handleAnswer(score.toString())}
+                title={score}
               >
-                {score}
+                <span className="mos-circle"></span>
+                <span className="mos-label">{score}</span>
               </button>
             ))}
           </div>
