@@ -104,22 +104,64 @@ def load_survey_data(survey_type):
                     sample_selected = tags_data.get('sample_selected', '')
                     
                     options = []
+                    used_tags = set()
                     
                     if sample_selected:
                         options.append(sample_selected)
+                        used_tags.add(sample_selected)
                     
-                    remaining_pool = [tag for tag in sample_pool if tag != sample_selected]
+                    remaining_pool = [tag for tag in sample_pool if tag != sample_selected and tag not in used_tags]
                     
-                    max_remaining = 3 - len(options)
-                    if len(remaining_pool) > max_remaining:
+                    needed_count = 4 - len(options) - 1
+                    if needed_count > 0 and len(remaining_pool) > 0:
                         random.shuffle(remaining_pool)
-                        options.extend(remaining_pool[:max_remaining])
-                    else:
-                        options.extend(remaining_pool)
+                        selected = remaining_pool[:needed_count]
+                        options.extend(selected)
+                        used_tags.update(selected)
                     
                     options.append('都不是')
+                    used_tags.add('都不是')
                     
-                    item['tags'] = options
+                    supplement_pool = [
+                        "Boat, Water vehicle",
+                        "Vehicle horn, car horn, honking",
+                        "Car alarm",
+                        "Power windows, electric windows",
+                        "Skidding",
+                        "Tire squeal",
+                        "Car passing by",
+                        "Race car, auto racing",
+                        "Air brake",
+                        "Air horn, truck horn",
+                        "Reversing beeps",
+                        "Ice cream truck, ice cream van",
+                        "Bus",
+                        "Police car (siren)",
+                        "Ambulance (siren)",
+                        "Fire engine, fire truck (siren)",
+                        "Motorcycle",
+                        "Traffic noise, roadway noise",
+                        "Train",
+                        "Railroad car, train wagon",
+                        "Train wheels squealing",
+                        "Subway, metro, underground",
+                        "Aircraft engine",
+                        "Helicopter",
+                        "Fixed-wing aircraft, airplane",
+                        "Bicycle bell",
+                        "Skateboard"
+                    ]
+                    
+                    while len(options) < 4:
+                        available = [tag for tag in supplement_pool if tag not in used_tags]
+                        if not available:
+                            break
+                        random.shuffle(available)
+                        selected_tag = available[0]
+                        options.insert(-1, selected_tag)
+                        used_tags.add(selected_tag)
+                    
+                    item['tags'] = options[:4]
                 elif isinstance(tags_data, list):
                     item['tags'] = tags_data[:4] if len(tags_data) > 4 else tags_data
                 else:
