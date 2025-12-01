@@ -1,6 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import axios from './axiosConfig'
 import Auth from './pages/Auth'
 import Home from './pages/Home'
 import Survey1 from './pages/Survey1'
@@ -8,21 +6,14 @@ import Survey2 from './pages/Survey2'
 import Survey3 from './pages/Survey3'
 
 function PrivateRoute({ children }) {
-  const [authenticated, setAuthenticated] = useState(null)
-
-  useEffect(() => {
-    axios.get('/api/auth/check').then(res => {
-      setAuthenticated(res.data.authenticated)
-    }).catch(() => {
-      setAuthenticated(false)
-    })
-  }, [])
-
-  if (authenticated === null) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>加载中...</div>
+  const name = sessionStorage.getItem('user_name')
+  const email = sessionStorage.getItem('user_email')
+  
+  if (!name || !email) {
+    return <Navigate to="/auth" replace />
   }
-
-  return authenticated ? children : <Navigate to="/auth" replace />
+  
+  return children
 }
 
 function App() {
