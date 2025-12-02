@@ -3,6 +3,7 @@ from flask_cors import CORS
 import os
 import json
 import tarfile
+import random
 import shutil
 from datetime import datetime
 
@@ -30,6 +31,7 @@ SURVEY2_STAGE_FILES = {
     'guide': 'guide5.tar',
     'test': 'test20.tar'
 }
+SURVEY3_FILE = 'test25.tar'
 
 def normalize_student_id(value):
     return str(value or '').strip()
@@ -294,6 +296,84 @@ def load_survey2_stage(stage):
     survey_data_cache[cache_key] = stage_data
     return stage_data
 
+def load_survey3_items():
+    cache_key = 'survey3_items'
+    if cache_key in survey_data_cache:
+        return survey_data_cache[cache_key]
+    
+    data_dir = os.path.join(DATA_FOLDER, 'data3')
+    tar_path = os.path.join(data_dir, SURVEY3_FILE)
+    if not os.path.exists(tar_path):
+        return None
+    
+    extract_dir = os.path.join(UPLOAD_FOLDER, 'survey3')
+    os.makedirs(extract_dir, exist_ok=True)
+    
+    temp_extract_dir = os.path.join(extract_dir, 'temp_extract')
+    os.makedirs(temp_extract_dir, exist_ok=True)
+    
+    audio_files, _ = extract_tar_file(tar_path, temp_extract_dir)
+    if not audio_files:
+        try:
+            shutil.rmtree(temp_extract_dir)
+        except:
+            pass
+        return None
+    
+    pairs = {}
+    for audio_info in audio_files:
+        audio_name = audio_info['name']
+        lower_name = audio_name.lower()
+        pair_key = None
+        audio_type = None
+        
+        if lower_name.startswith('raw_sample_'):
+            audio_type = 'raw'
+            pair_key = lower_name.replace('raw_sample_', '').split('.')[0]
+        elif lower_name.startswith('superres_sample_'):
+            audio_type = 'super'
+            pair_key = lower_name.replace('superres_sample_', '').split('.')[0]
+        else:
+            continue
+        
+        if not pair_key:
+            continue
+        
+        final_path = os.path.join(extract_dir, audio_name)
+        if os.path.exists(audio_info['path']) and not os.path.exists(final_path):
+            shutil.move(audio_info['path'], final_path)
+        elif not os.path.exists(final_path):
+            continue
+        
+        pair_entry = pairs.setdefault(pair_key, {'raw': None, 'super': None})
+        pair_entry[audio_type] = {
+            'audio': f"/api/audio/3/{audio_name}",
+            'filename': audio_name
+        }
+    
+    try:
+        shutil.rmtree(temp_extract_dir)
+    except:
+        pass
+    
+    items = []
+    for pair_key in sorted(pairs.keys(), key=lambda x: int(x) if str(x).isdigit() else x):
+        data = pairs[pair_key]
+        if not data.get('raw') or not data.get('super'):
+            continue
+        options = [
+            {'id': 'raw', 'audio': data['raw']['audio'], 'filename': data['raw']['filename']},
+            {'id': 'super', 'audio': data['super']['audio'], 'filename': data['super']['filename']}
+        ]
+        items.append({
+            'index': len(items),
+            'pair_key': pair_key,
+            'options': options
+        })
+    
+    survey_data_cache[cache_key] = items
+    return items
+
 @app.route('/api/surveys/<int:survey_type>/items', methods=['GET'])
 def get_survey_items(survey_type):
     stage = request.args.get('stage')
@@ -309,6 +389,20 @@ def get_survey_items(survey_type):
         if not stage_data:
             return jsonify({'error': '问卷数据不存在'}), 404
         return jsonify({'items': stage_data.get('items', [])})
+    if survey_type == 3:
+        items = load_survey3_items()
+        if items is None:
+            return jsonify({'error': '问卷数据不存在'}), 404
+        randomized_items = []
+        for item in items:
+            option_list = list(item.get('options', []))
+            random.shuffle(option_list)
+            randomized_items.append({
+                'index': item.get('index'),
+                'pair_key': item.get('pair_key'),
+                'options': option_list
+            })
+        return jsonify({'items': randomized_items})
     
     items = load_survey_data(survey_type)
     if items is None:
@@ -338,6 +432,8 @@ def submit_survey(survey_type):
         return submit_survey2_guide(name, email, student_id, answers)
     if survey_type == 2:
         return submit_survey2_test(name, email, student_id, answers)
+    if survey_type == 3:
+        return submit_survey3(name, email, student_id, answers)
     
     items = load_survey_data(survey_type)
     if items is None:
@@ -523,6 +619,49 @@ def submit_survey2_test(name, email, student_id, answers):
     
     student_dir = student_dir_path(student_id)
     output_file = os.path.join(student_dir, 'survey2_test20.json')
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(output_data, f, ensure_ascii=False, indent=2)
+    
+    return jsonify({'success': True})
+
+def submit_survey3(name, email, student_id, answers):
+    items = load_survey3_items()
+    if not items:
+        return jsonify({'error': '题目数据不存在'}), 404
+    
+    item_map = {item['index']: item for item in items}
+    output_answers = []
+    for answer in answers:
+        idx = answer.get('index')
+        selection = normalize_option(answer.get('answer'))
+        item_data = item_map.get(idx)
+        pair_key = item_data.get('pair_key') if item_data else ''
+        selected_audio = ''
+        if item_data:
+            for option in item_data.get('options', []):
+                if normalize_option(option.get('id')) == selection:
+                    selected_audio = option.get('filename') or option.get('audio', '')
+                    break
+        output_answers.append({
+            'item_index': idx,
+            'pair_key': pair_key,
+            'selected_option': selection,
+            'selected_audio': selected_audio
+        })
+    
+    output_data = {
+        'survey_type': 3,
+        'stage': 'test25',
+        'name': name,
+        'email': email,
+        'student_id': student_id,
+        'submitted_at': datetime.now().isoformat(),
+        'answers': output_answers,
+        'total_items': len(items)
+    }
+    
+    student_dir = student_dir_path(student_id)
+    output_file = os.path.join(student_dir, 'survey3.json')
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
     
