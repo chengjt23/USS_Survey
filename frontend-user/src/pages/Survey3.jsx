@@ -141,11 +141,9 @@ function Survey3() {
   const renderIntro = () => (
     <div className="intro-section">
       <h1>问卷三：音频对比测试</h1>
-      <p>本问卷包含 25 道题，每题会给出一对音频，音频顺序已随机。请认真聆听两个音频后，选择你认为音质更好的那一个。</p>
+      <p>本问卷包含 25 道题，每题会给出一对音频，请认真聆听两个音频后，选择你认为音质更好的那一个。</p>
       <ul className="intro-list">
         <li>每道题仅可选择一个音频。</li>
-        <li>可以在题目之间前后切换，提交前可随时修改答案。</li>
-        <li>提交后系统会保存你的选择结果。</li>
       </ul>
       {loading ? (
         <div className="loading">题目加载中...</div>

@@ -278,16 +278,15 @@ function Survey1() {
   const renderIntro = () => (
     <div className="intro-section">
       <h1>问卷一：单音频事件判断</h1>
-      <p>本问卷用于评估你区分音频中单一事件与复合事件的能力。完整流程包含 5 道引导练习题与 20 道正式测试题。</p>
+      <p>本问卷包含 5 道练习题与 20 道正式测试题。</p>
       <ul className="intro-list">
+        <li>每个题目内，你需要根据一段10s左右的音频，判断该音频内容是否只包含一个音频事件</li>
         <li>引导练习需全部完成并达到 60% 正确率才可进入正式测试。</li>
-        <li>引导题有标准答案，正式题与之前的提交逻辑保持一致。</li>
-        <li>每题只需要判断音频内是否仅包含一个音频事件。</li>
       </ul>
       <div className="intro-guide">
         <h2>什么是“单音频事件”?</h2>
-        <p>同一种声音连续出现，算作同一个音频事件。例如两个男人交谈，都属于“Man Speaking”。</p>
-        <p>不同类型的声音同时存在则属于不同事件。例如一个男人和一个女人对话，是“Man Speaking”与“Woman Speaking”两个事件；人声和歌声同现，也被视为两个独立事件。</p>
+        <p>单音频事件例子：两个男人交谈，都属于“Man Speaking”，属于一个音频事件（我们不区分说话的具体的人）。</p>
+        <p>多音频事件例子：一个男人和一个女人对话，是“Man Speaking”与“Woman Speaking”两个事件；人声和歌声也被视为两个音频事件。</p>
       </div>
       {guideLoading ? (
         <div className="loading">引导题目加载中...</div>
