@@ -4,6 +4,7 @@ import os
 import json
 import tarfile
 import random
+import shutil
 from datetime import datetime
 
 app = Flask(__name__)
@@ -22,6 +23,10 @@ os.makedirs(os.path.join(UPLOAD_FOLDER, 'survey2'), exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_FOLDER, 'survey3'), exist_ok=True)
 
 survey_data_cache = {}
+SURVEY1_STAGE_FILES = {
+    'guide': 'guide5.tar',
+    'test': 'test20.tar'
+}
 
 def extract_tar_file(tar_path, extract_to):
     audio_files = []
@@ -86,7 +91,6 @@ def load_survey_data(survey_type):
         
         final_path = os.path.join(extract_dir, audio_name)
         if os.path.exists(audio_info['path']) and not os.path.exists(final_path):
-            import shutil
             shutil.move(audio_info['path'], final_path)
         elif not os.path.exists(final_path):
             continue
@@ -173,7 +177,6 @@ def load_survey_data(survey_type):
         
         items.append(item)
     
-    import shutil
     if os.path.exists(temp_extract_dir):
         try:
             shutil.rmtree(temp_extract_dir)
@@ -183,13 +186,94 @@ def load_survey_data(survey_type):
     survey_data_cache[survey_type] = items
     return items
 
+def load_survey1_stage(stage):
+    stage = stage if stage in SURVEY1_STAGE_FILES else 'test'
+    cache_key = f'survey1_{stage}'
+    if cache_key in survey_data_cache:
+        return survey_data_cache[cache_key]
+    
+    stage_file = SURVEY1_STAGE_FILES.get(stage)
+    stage_dir = os.path.join(DATA_FOLDER, 'data1')
+    if not stage_file or not os.path.exists(os.path.join(stage_dir, stage_file)):
+        return None
+    
+    tar_path = os.path.join(stage_dir, stage_file)
+    extract_dir = os.path.join(UPLOAD_FOLDER, 'survey1')
+    os.makedirs(extract_dir, exist_ok=True)
+    
+    temp_extract_dir = os.path.join(extract_dir, f'temp_{stage}')
+    os.makedirs(temp_extract_dir, exist_ok=True)
+    
+    audio_files, tag_data = extract_tar_file(tar_path, temp_extract_dir)
+    if not audio_files:
+        try:
+            shutil.rmtree(temp_extract_dir)
+        except:
+            pass
+        return None
+    
+    audio_files.sort(key=lambda x: x['name'])
+    items = []
+    answer_lookup = {}
+    if stage == 'guide':
+        raw_answer = tag_data.get('answer')
+        answer_list = []
+        if isinstance(raw_answer, dict) and 'sample_pool' in raw_answer:
+            answer_list = raw_answer.get('sample_pool', [])
+        elif isinstance(raw_answer, list):
+            answer_list = raw_answer
+        for entry in answer_list:
+            audio_name = entry.get('audio')
+            if not audio_name:
+                continue
+            answer_lookup[audio_name] = bool(entry.get('answer', False))
+    
+    answers_by_index = {}
+    for idx, audio_info in enumerate(audio_files):
+        audio_name = audio_info['name']
+        final_path = os.path.join(extract_dir, audio_name)
+        if os.path.exists(audio_info['path']) and not os.path.exists(final_path):
+            import shutil
+            shutil.move(audio_info['path'], final_path)
+        elif not os.path.exists(final_path):
+            continue
+        
+        item = {
+            'index': idx,
+            'audio': f"/api/audio/1/{audio_name}"
+        }
+        
+        if stage == 'guide':
+            answers_by_index[idx] = answer_lookup.get(audio_name, False)
+        
+        items.append(item)
+    
+    import shutil
+    if os.path.exists(temp_extract_dir):
+        try:
+            shutil.rmtree(temp_extract_dir)
+        except:
+            pass
+    
+    stage_data = {'items': items}
+    if stage == 'guide':
+        stage_data['answer_map'] = answers_by_index
+    survey_data_cache[cache_key] = stage_data
+    return stage_data
+
 @app.route('/api/surveys/<int:survey_type>/items', methods=['GET'])
 def get_survey_items(survey_type):
-    items = load_survey_data(survey_type)
+    stage = request.args.get('stage')
+    if survey_type == 1:
+        stage_key = 'guide' if stage == 'guide' else 'test'
+        stage_data = load_survey1_stage(stage_key)
+        if not stage_data:
+            return jsonify({'error': '问卷数据不存在'}), 404
+        return jsonify({'items': stage_data.get('items', [])})
     
+    items = load_survey_data(survey_type)
     if items is None:
         return jsonify({'error': '问卷数据不存在'}), 404
-    
     return jsonify({'items': items})
 
 @app.route('/api/surveys/<int:survey_type>/submit', methods=['POST'])
@@ -198,9 +282,15 @@ def submit_survey(survey_type):
     answers = data.get('answers', [])
     email = data.get('email', '')
     name = data.get('name', '')
+    stage = data.get('stage', '')
     
     if not email:
         return jsonify({'error': '邮箱不能为空'}), 400
+    
+    if survey_type == 1 and stage == 'guide':
+        return submit_survey1_guide(name, email, answers)
+    if survey_type == 1:
+        return submit_survey1_test(name, email, answers)
     
     items = load_survey_data(survey_type)
     if items is None:
@@ -224,6 +314,92 @@ def submit_survey(survey_type):
     os.makedirs(email_dir, exist_ok=True)
     
     output_file = os.path.join(email_dir, f'survey_{survey_type}.json')
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(output_data, f, ensure_ascii=False, indent=2)
+    
+    return jsonify({'success': True})
+
+def normalize_boolean(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        value = value.strip().lower()
+        return value in ['true', '1', 'yes', '是']
+    if isinstance(value, (int, float)):
+        return value != 0
+    return False
+
+def submit_survey1_guide(name, email, answers):
+    stage_data = load_survey1_stage('guide')
+    if not stage_data or 'answer_map' not in stage_data:
+        return jsonify({'error': '引导题目不存在'}), 404
+    
+    answer_map = stage_data['answer_map']
+    total = len(answer_map)
+    correct_count = 0
+    
+    for answer in answers:
+        idx = answer.get('index')
+        if idx is None or idx not in answer_map:
+            continue
+        user_answer = normalize_boolean(answer.get('answer'))
+        if user_answer == bool(answer_map[idx]):
+            correct_count += 1
+    
+    accuracy = correct_count / total if total else 0
+    passed = accuracy >= 0.6
+    
+    output_data = {
+        'survey_type': 1,
+        'stage': 'guide5',
+        'name': name,
+        'email': email,
+        'submitted_at': datetime.now().isoformat(),
+        'answers': [{
+            'item_index': answer.get('index'),
+            'answer': answer.get('answer')
+        } for answer in answers],
+        'total_items': total,
+        'correct_count': correct_count,
+        'accuracy': accuracy,
+        'passed': passed
+    }
+    
+    email_dir = os.path.join(OUTPUT_FOLDER, email)
+    os.makedirs(email_dir, exist_ok=True)
+    output_file = os.path.join(email_dir, 'guide5.json')
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(output_data, f, ensure_ascii=False, indent=2)
+    
+    return jsonify({
+        'success': True,
+        'passed': passed,
+        'accuracy': accuracy,
+        'correct_count': correct_count,
+        'total': total
+    })
+
+def submit_survey1_test(name, email, answers):
+    stage_data = load_survey1_stage('test')
+    if not stage_data:
+        return jsonify({'error': '正式题目不存在'}), 404
+    
+    output_data = {
+        'survey_type': 1,
+        'stage': 'test20',
+        'name': name,
+        'email': email,
+        'submitted_at': datetime.now().isoformat(),
+        'answers': [{
+            'item_index': answer.get('index'),
+            'answer': answer.get('answer')
+        } for answer in answers],
+        'total_items': len(stage_data.get('items', []))
+    }
+    
+    email_dir = os.path.join(OUTPUT_FOLDER, email)
+    os.makedirs(email_dir, exist_ok=True)
+    output_file = os.path.join(email_dir, 'test20.json')
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
     
