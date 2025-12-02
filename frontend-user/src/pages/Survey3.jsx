@@ -89,17 +89,19 @@ function Survey3() {
   const submitSurvey = (finalAnswers) => {
     setSubmitting(true)
     const answerArray = Object.keys(finalAnswers).map(index => ({
-      index: parseInt(index),
+      index: parseInt(index, 10),
       answer: finalAnswers[index]
     }))
     
     const name = sessionStorage.getItem('user_name')
     const email = sessionStorage.getItem('user_email')
+    const studentId = sessionStorage.getItem('user_student_id')
     
     axios.post('/api/surveys/3/submit', {
       answers: answerArray,
       name: name,
-      email: email
+      email: email,
+      student_id: studentId
     }).then(() => {
       localStorage.removeItem(STORAGE_KEY)
       setTimeout(() => {

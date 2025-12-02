@@ -28,6 +28,16 @@ SURVEY1_STAGE_FILES = {
     'test': 'test20.tar'
 }
 
+def normalize_student_id(value):
+    return str(value or '').strip()
+
+def student_dir_path(student_id):
+    safe_name = ''.join(ch if ch.isalnum() or ch in ('-', '_') else '_' for ch in student_id)
+    safe_name = safe_name or 'student'
+    path = os.path.join(OUTPUT_FOLDER, safe_name)
+    os.makedirs(path, exist_ok=True)
+    return path
+
 def extract_tar_file(tar_path, extract_to):
     audio_files = []
     tag_data = {}
@@ -283,14 +293,18 @@ def submit_survey(survey_type):
     email = data.get('email', '')
     name = data.get('name', '')
     stage = data.get('stage', '')
+    student_id = normalize_student_id(data.get('student_id', ''))
     
     if not email:
         return jsonify({'error': '邮箱不能为空'}), 400
     
+    if not student_id:
+        return jsonify({'error': '学号不能为空'}), 400
+    
     if survey_type == 1 and stage == 'guide':
-        return submit_survey1_guide(name, email, answers)
+        return submit_survey1_guide(name, email, student_id, answers)
     if survey_type == 1:
-        return submit_survey1_test(name, email, answers)
+        return submit_survey1_test(name, email, student_id, answers)
     
     items = load_survey_data(survey_type)
     if items is None:
@@ -300,6 +314,7 @@ def submit_survey(survey_type):
         'survey_type': survey_type,
         'name': name,
         'email': email,
+        'student_id': student_id,
         'submitted_at': datetime.now().isoformat(),
         'answers': []
     }
@@ -310,10 +325,8 @@ def submit_survey(survey_type):
             'answer': answer['answer']
         })
     
-    email_dir = os.path.join(OUTPUT_FOLDER, email)
-    os.makedirs(email_dir, exist_ok=True)
-    
-    output_file = os.path.join(email_dir, f'survey_{survey_type}.json')
+    student_dir = student_dir_path(student_id)
+    output_file = os.path.join(student_dir, f'survey_{survey_type}.json')
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
     
@@ -329,7 +342,7 @@ def normalize_boolean(value):
         return value != 0
     return False
 
-def submit_survey1_guide(name, email, answers):
+def submit_survey1_guide(name, email, student_id, answers):
     stage_data = load_survey1_stage('guide')
     if not stage_data or 'answer_map' not in stage_data:
         return jsonify({'error': '引导题目不存在'}), 404
@@ -354,6 +367,7 @@ def submit_survey1_guide(name, email, answers):
         'stage': 'guide5',
         'name': name,
         'email': email,
+        'student_id': student_id,
         'submitted_at': datetime.now().isoformat(),
         'answers': [{
             'item_index': answer.get('index'),
@@ -365,9 +379,8 @@ def submit_survey1_guide(name, email, answers):
         'passed': passed
     }
     
-    email_dir = os.path.join(OUTPUT_FOLDER, email)
-    os.makedirs(email_dir, exist_ok=True)
-    output_file = os.path.join(email_dir, 'guide5.json')
+    student_dir = student_dir_path(student_id)
+    output_file = os.path.join(student_dir, 'guide5.json')
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
     
@@ -379,7 +392,7 @@ def submit_survey1_guide(name, email, answers):
         'total': total
     })
 
-def submit_survey1_test(name, email, answers):
+def submit_survey1_test(name, email, student_id, answers):
     stage_data = load_survey1_stage('test')
     if not stage_data:
         return jsonify({'error': '正式题目不存在'}), 404
@@ -389,6 +402,7 @@ def submit_survey1_test(name, email, answers):
         'stage': 'test20',
         'name': name,
         'email': email,
+        'student_id': student_id,
         'submitted_at': datetime.now().isoformat(),
         'answers': [{
             'item_index': answer.get('index'),
@@ -397,9 +411,8 @@ def submit_survey1_test(name, email, answers):
         'total_items': len(stage_data.get('items', []))
     }
     
-    email_dir = os.path.join(OUTPUT_FOLDER, email)
-    os.makedirs(email_dir, exist_ok=True)
-    output_file = os.path.join(email_dir, 'test20.json')
+    student_dir = student_dir_path(student_id)
+    output_file = os.path.join(student_dir, 'test20.json')
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
     

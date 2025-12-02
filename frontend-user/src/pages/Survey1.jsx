@@ -118,10 +118,12 @@ function Survey1() {
     })).sort((a, b) => a.index - b.index)
     const name = sessionStorage.getItem('user_name')
     const email = sessionStorage.getItem('user_email')
+    const studentId = sessionStorage.getItem('user_student_id')
     axios.post('/api/surveys/1/submit', {
       answers: answerArray,
       name: name,
       email: email,
+      student_id: studentId,
       stage: 'guide'
     }).then(res => {
       setGuideSubmitting(false)
@@ -193,10 +195,12 @@ function Survey1() {
     })).sort((a, b) => a.index - b.index)
     const name = sessionStorage.getItem('user_name')
     const email = sessionStorage.getItem('user_email')
+    const studentId = sessionStorage.getItem('user_student_id')
     axios.post('/api/surveys/1/submit', {
       answers: answerArray,
       name: name,
       email: email,
+      student_id: studentId,
       stage: 'test'
     }).then(() => {
       setTestSubmitting(false)

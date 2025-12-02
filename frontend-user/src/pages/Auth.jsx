@@ -6,6 +6,7 @@ function Auth() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [studentId, setStudentId] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -19,7 +20,7 @@ function Auth() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!name || !email) {
+    if (!name || !email || !studentId) {
       setError('请填写所有字段')
       return
     }
@@ -35,6 +36,7 @@ function Auth() {
     
     sessionStorage.setItem('user_name', name)
     sessionStorage.setItem('user_email', email)
+    sessionStorage.setItem('user_student_id', studentId)
     navigate('/')
   }
 
@@ -66,6 +68,17 @@ function Auth() {
                 placeholder="姓名"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                className="form-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                placeholder="学号"
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value)}
                 className="form-input"
                 required
               />
