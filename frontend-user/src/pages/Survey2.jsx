@@ -20,6 +20,15 @@ function Survey2() {
   const [testSubmitting, setTestSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
+  const shuffleTags = (tags = []) => {
+    const shuffled = [...tags]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+  }
+
   const resetAudio = () => {
     if (audioRef.current) {
       audioRef.current.pause()
@@ -32,7 +41,11 @@ function Survey2() {
     setErrorMessage('')
     axios.get('/api/surveys/2/items', { params: { stage: 'guide' } })
       .then(res => {
-        setGuideItems(res.data.items || [])
+        const fetched = (res.data.items || []).map(item => ({
+          ...item,
+          tags: shuffleTags(item.tags || [])
+        }))
+        setGuideItems(fetched)
         setGuideIndex(0)
         setGuideAnswers({})
       })
@@ -49,7 +62,11 @@ function Survey2() {
     setErrorMessage('')
     axios.get('/api/surveys/2/items', { params: { stage: 'test' } })
       .then(res => {
-        setTestItems(res.data.items || [])
+        const fetched = (res.data.items || []).map(item => ({
+          ...item,
+          tags: shuffleTags(item.tags || [])
+        }))
+        setTestItems(fetched)
         setTestIndex(0)
         setTestAnswers({})
         if (enterAfterLoad) {
