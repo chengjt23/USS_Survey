@@ -7,6 +7,7 @@ function Survey1() {
   const navigate = useNavigate()
   const audioRef = useRef(null)
   const [phase, setPhase] = useState('intro')
+  const [accessGranted, setAccessGranted] = useState(false)
   const [guideItems, setGuideItems] = useState([])
   const [guideIndex, setGuideIndex] = useState(0)
   const [guideAnswers, setGuideAnswers] = useState({})
@@ -19,6 +20,21 @@ function Survey1() {
   const [testLoading, setTestLoading] = useState(false)
   const [testSubmitting, setTestSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+
+  const updateCompletionStorage = (status) => {
+    try {
+      sessionStorage.setItem('survey_completions', JSON.stringify(status))
+    } catch {}
+  }
+
+  const markSurveyCompleted = () => {
+    try {
+      const stored = sessionStorage.getItem('survey_completions')
+      const status = stored ? JSON.parse(stored) : {}
+      status.survey1 = true
+      sessionStorage.setItem('survey_completions', JSON.stringify(status))
+    } catch {}
+  }
 
   const resetAudio = () => {
     if (audioRef.current) {
@@ -66,8 +82,35 @@ function Survey1() {
   }
 
   useEffect(() => {
-    fetchGuideItems()
-  }, [])
+    const studentId = sessionStorage.getItem('user_student_id')
+    if (!studentId) {
+      navigate('/auth')
+      return
+    }
+    axios.get('/api/surveys/completions', {
+      params: { student_id: studentId }
+    }).then(res => {
+      const status = {
+        survey1: !!res.data?.survey1,
+        survey2: !!res.data?.survey2,
+        survey3: !!res.data?.survey3
+      }
+      updateCompletionStorage(status)
+      if (status.survey1) {
+        navigate('/')
+      } else {
+        setAccessGranted(true)
+      }
+    }).catch(() => {
+      setAccessGranted(true)
+    })
+  }, [navigate])
+
+  useEffect(() => {
+    if (accessGranted) {
+      fetchGuideItems()
+    }
+  }, [accessGranted])
 
   const handleBack = () => {
     navigate('/')
@@ -204,6 +247,7 @@ function Survey1() {
       stage: 'test'
     }).then(() => {
       setTestSubmitting(false)
+      markSurveyCompleted()
       setPhase('completed')
       resetAudio()
       setTimeout(() => {

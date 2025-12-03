@@ -8,12 +8,28 @@ function Survey3() {
   const audioRefs = useRef({})
   const STORAGE_KEY = 'survey3_progress'
   const [phase, setPhase] = useState('intro')
+  const [accessGranted, setAccessGranted] = useState(false)
   const [items, setItems] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+
+  const updateCompletionStorage = (status) => {
+    try {
+      sessionStorage.setItem('survey_completions', JSON.stringify(status))
+    } catch {}
+  }
+
+  const markSurveyCompleted = () => {
+    try {
+      const stored = sessionStorage.getItem('survey_completions')
+      const status = stored ? JSON.parse(stored) : {}
+      status.survey3 = true
+      sessionStorage.setItem('survey_completions', JSON.stringify(status))
+    } catch {}
+  }
 
   const resetAudios = () => {
     const refs = audioRefs.current[currentIndex] || {}
@@ -33,6 +49,34 @@ function Survey3() {
   }
 
   useEffect(() => {
+    const studentId = sessionStorage.getItem('user_student_id')
+    if (!studentId) {
+      navigate('/auth')
+      return
+    }
+    axios.get('/api/surveys/completions', {
+      params: { student_id: studentId }
+    }).then(res => {
+      const status = {
+        survey1: !!res.data?.survey1,
+        survey2: !!res.data?.survey2,
+        survey3: !!res.data?.survey3
+      }
+      updateCompletionStorage(status)
+      if (status.survey3) {
+        navigate('/')
+      } else {
+        setAccessGranted(true)
+      }
+    }).catch(() => {
+      setAccessGranted(true)
+    })
+  }, [navigate])
+
+  useEffect(() => {
+    if (!accessGranted) {
+      return
+    }
     axios.get('/api/surveys/3/items').then(res => {
       const fetchedItems = res.data.items || []
       setItems(fetchedItems)
@@ -55,7 +99,7 @@ function Survey3() {
     }).catch(() => {
       navigate('/')
     })
-  }, [navigate])
+  }, [accessGranted, navigate])
 
   useEffect(() => {
     if (items.length > 0) {
@@ -128,6 +172,7 @@ function Survey3() {
       student_id: studentId
     }).then(() => {
       localStorage.removeItem(STORAGE_KEY)
+      markSurveyCompleted()
       setPhase('completed')
       setTimeout(() => {
         navigate('/')

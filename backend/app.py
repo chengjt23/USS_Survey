@@ -36,10 +36,13 @@ SURVEY3_FILE = 'test25.tar'
 def normalize_student_id(value):
     return str(value or '').strip()
 
-def student_dir_path(student_id):
+def student_dir_base(student_id):
     safe_name = ''.join(ch if ch.isalnum() or ch in ('-', '_') else '_' for ch in student_id)
     safe_name = safe_name or 'student'
-    path = os.path.join(OUTPUT_FOLDER, safe_name)
+    return os.path.join(OUTPUT_FOLDER, safe_name)
+
+def student_dir_path(student_id):
+    path = student_dir_base(student_id)
     os.makedirs(path, exist_ok=True)
     return path
 
@@ -408,6 +411,25 @@ def get_survey_items(survey_type):
     if items is None:
         return jsonify({'error': '问卷数据不存在'}), 404
     return jsonify({'items': items})
+
+@app.route('/api/surveys/completions', methods=['GET'])
+def get_survey_completions():
+    student_id = normalize_student_id(request.args.get('student_id', ''))
+    if not student_id:
+        return jsonify({'error': '学号不能为空'}), 400
+    
+    dir_path = student_dir_base(student_id)
+    def file_exists(filename):
+        if not dir_path:
+            return False
+        return os.path.exists(os.path.join(dir_path, filename))
+    
+    status = {
+        'survey1': file_exists('survey1_test20.json'),
+        'survey2': file_exists('survey2_test20.json'),
+        'survey3': file_exists('survey3.json')
+    }
+    return jsonify(status)
 
 @app.route('/api/surveys/<int:survey_type>/submit', methods=['POST'])
 def submit_survey(survey_type):
