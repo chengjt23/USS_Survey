@@ -95,27 +95,28 @@ function Home() {
   }
 
   return (
-    <div className="home">
-      <div className="container">
-        <h1>问卷系统</h1>
-        <div className="surveys-grid">
-          {surveys.map(survey => {
-            const isCompleted = completions[survey.key]
-            return (
-              <div 
-                key={survey.id} 
-                className={`survey-card ${isCompleted ? 'disabled' : 'active'}`}
-                onClick={() => handleEnterSurvey(survey.id, survey.key)}
-              >
-                <h2>{survey.title}</h2>
-                <p>{survey.desc}</p>
-                {isCompleted && <span className="completed-tag">已完成</span>}
-              </div>
-            )
-          })}
+    <>
+      <div className="home">
+        <div className="container">
+          <h1>问卷系统</h1>
+          <div className="surveys-grid">
+            {surveys.map(survey => {
+              const isCompleted = completions[survey.key]
+              return (
+                <div 
+                  key={survey.id} 
+                  className={`survey-card ${isCompleted ? 'disabled' : 'active'}`}
+                  onClick={() => handleEnterSurvey(survey.id, survey.key)}
+                >
+                  <h2>{survey.title}</h2>
+                  <p>{survey.desc}</p>
+                  {isCompleted && <span className="completed-tag">已完成</span>}
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
-    </div>
     {showFinalModal && (
       <div className="final-overlay">
         <div className="final-modal">
@@ -132,6 +133,7 @@ function Home() {
         </div>
       </div>
     )}
+    </>
   )
 }
 
