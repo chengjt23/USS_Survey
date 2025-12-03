@@ -10,6 +10,12 @@ function Home() {
     survey2: false,
     survey3: false
   })
+  const [showFinalModal, setShowFinalModal] = useState(false)
+  const [userInfo, setUserInfo] = useState({
+    name: '',
+    email: '',
+    studentId: ''
+  })
 
   useEffect(() => {
     localStorage.removeItem('survey1_progress')
@@ -64,6 +70,30 @@ function Home() {
     navigate(`/survey${surveyId}`)
   }
 
+  useEffect(() => {
+    if (completions.survey1 && completions.survey2 && completions.survey3) {
+      const name = sessionStorage.getItem('user_name') || ''
+      const email = sessionStorage.getItem('user_email') || ''
+      const studentId = sessionStorage.getItem('user_student_id') || ''
+      setUserInfo({ name, email, studentId })
+      setShowFinalModal(true)
+    } else {
+      setShowFinalModal(false)
+    }
+  }, [completions])
+
+  const handleFinalConfirm = () => {
+    sessionStorage.removeItem('user_name')
+    sessionStorage.removeItem('user_email')
+    sessionStorage.removeItem('user_student_id')
+    sessionStorage.removeItem('survey_completions')
+    localStorage.removeItem('survey1_progress')
+    localStorage.removeItem('survey2_progress')
+    localStorage.removeItem('survey3_progress')
+    setShowFinalModal(false)
+    navigate('/auth')
+  }
+
   return (
     <div className="home">
       <div className="container">
@@ -86,6 +116,22 @@ function Home() {
         </div>
       </div>
     </div>
+    {showFinalModal && (
+      <div className="final-overlay">
+        <div className="final-modal">
+          <h2>感谢参与</h2>
+          <p>你已完成全部问卷，请确认以下个人信息是否正确。</p>
+          <div className="final-info">
+            <p><span>姓名：</span>{userInfo.name || '—'}</p>
+            <p><span>邮箱：</span>{userInfo.email || '—'}</p>
+            <p><span>学号：</span>{userInfo.studentId || '—'}</p>
+          </div>
+          <div className="final-actions">
+            <button className="final-btn" onClick={handleFinalConfirm}>确认并退出</button>
+          </div>
+        </div>
+      </div>
+    )}
   )
 }
 
