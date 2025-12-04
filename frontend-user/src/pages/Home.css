@@ -177,6 +177,29 @@
   margin-right: 5px;
 }
 
+.final-info label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  font-weight: 600;
+  color: #0D47A1;
+}
+
+.final-info input {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(33, 150, 243, 0.3);
+  font-size: 1em;
+  color: #0D47A1;
+  background: #f6fbff;
+}
+
+.final-info input:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
+}
 .final-actions {
   display: flex;
   justify-content: center;
