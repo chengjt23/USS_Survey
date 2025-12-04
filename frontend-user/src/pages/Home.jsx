@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import axios from '../axiosConfig'
 import './Home.css'
 
@@ -16,6 +16,7 @@ function Home() {
     email: '',
     studentId: ''
   })
+  const [finalError, setFinalError] = useState('')
 
   useEffect(() => {
     localStorage.removeItem('survey1_progress')
@@ -82,14 +83,30 @@ function Home() {
     }
   }, [completions])
 
+  const infoError = useMemo(() => {
+    if (!userInfo.name || !userInfo.email || !userInfo.studentId) {
+      return '请完整填写个人信息'
+    }
+    if (!userInfo.email.includes('@')) {
+      return '邮箱格式不正确'
+    }
+    return ''
+  }, [userInfo])
+
   const handleUserInfoChange = (field, value) => {
     setUserInfo(prev => ({
       ...prev,
       [field]: value
     }))
+    setFinalError('')
   }
 
   const handleFinalConfirm = () => {
+    if (infoError) {
+      setFinalError(infoError)
+      return
+    }
+    setFinalError('')
     sessionStorage.setItem('user_name', userInfo.name)
     sessionStorage.setItem('user_email', userInfo.email)
     sessionStorage.setItem('user_student_id', userInfo.studentId)
@@ -156,7 +173,14 @@ function Home() {
               </label>
           </div>
           <div className="final-actions">
-            <button className="final-btn" onClick={handleFinalConfirm}>确认并退出</button>
+            {finalError && <div className="final-error">{finalError}</div>}
+            <button 
+              className="final-btn" 
+              onClick={handleFinalConfirm}
+              disabled={!!infoError}
+            >
+              确认并退出
+            </button>
           </div>
         </div>
       </div>
