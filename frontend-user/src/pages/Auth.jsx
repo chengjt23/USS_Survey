@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Auth.css'
 
@@ -9,6 +9,20 @@ function Auth() {
   const [studentId, setStudentId] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    const pendingInfo = sessionStorage.getItem('pending_user_info')
+    if (pendingInfo) {
+      try {
+        const info = JSON.parse(pendingInfo)
+        if (info.name) setName(info.name)
+        if (info.email) setEmail(info.email)
+        if (info.studentId) setStudentId(info.studentId)
+      } catch (e) {
+        console.error('预填信息解析失败', e)
+      }
+    }
+  }, [])
 
   const shapePositions = useMemo(() => {
     return Array.from({ length: 20 }, (_, i) => ({
@@ -37,6 +51,7 @@ function Auth() {
     sessionStorage.setItem('user_name', name)
     sessionStorage.setItem('user_email', email)
     sessionStorage.setItem('user_student_id', studentId)
+    sessionStorage.removeItem('pending_user_info')
     navigate('/')
   }
 
