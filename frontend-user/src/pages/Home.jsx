@@ -107,9 +107,12 @@ function Home() {
       return
     }
     setFinalError('')
-    sessionStorage.setItem('user_name', userInfo.name)
-    sessionStorage.setItem('user_email', userInfo.email)
-    sessionStorage.setItem('user_student_id', userInfo.studentId)
+    try {
+      sessionStorage.setItem('pending_user_info', JSON.stringify(userInfo))
+    } catch {}
+    sessionStorage.removeItem('user_name')
+    sessionStorage.removeItem('user_email')
+    sessionStorage.removeItem('user_student_id')
     sessionStorage.removeItem('survey_completions')
     localStorage.removeItem('survey1_progress')
     localStorage.removeItem('survey2_progress')
