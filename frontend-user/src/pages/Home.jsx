@@ -93,9 +93,6 @@ function Home() {
     sessionStorage.setItem('user_name', userInfo.name)
     sessionStorage.setItem('user_email', userInfo.email)
     sessionStorage.setItem('user_student_id', userInfo.studentId)
-    sessionStorage.removeItem('user_name')
-    sessionStorage.removeItem('user_email')
-    sessionStorage.removeItem('user_student_id')
     sessionStorage.removeItem('survey_completions')
     localStorage.removeItem('survey1_progress')
     localStorage.removeItem('survey2_progress')
@@ -133,9 +130,30 @@ function Home() {
           <h2>感谢参与</h2>
           <p>你已完成全部问卷，请确认以下个人信息是否正确。</p>
           <div className="final-info">
-            <p><span>姓名：</span>{userInfo.name || '—'}</p>
-            <p><span>邮箱：</span>{userInfo.email || '—'}</p>
-            <p><span>学号：</span>{userInfo.studentId || '—'}</p>
+              <label>
+                <span>姓名：</span>
+                <input
+                  type="text"
+                  value={userInfo.name}
+                  onChange={(e) => handleUserInfoChange('name', e.target.value)}
+                />
+              </label>
+              <label>
+                <span>邮箱：</span>
+                <input
+                  type="email"
+                  value={userInfo.email}
+                  onChange={(e) => handleUserInfoChange('email', e.target.value)}
+                />
+              </label>
+              <label>
+                <span>学号：</span>
+                <input
+                  type="text"
+                  value={userInfo.studentId}
+                  onChange={(e) => handleUserInfoChange('studentId', e.target.value)}
+                />
+              </label>
           </div>
           <div className="final-actions">
             <button className="final-btn" onClick={handleFinalConfirm}>确认并退出</button>
