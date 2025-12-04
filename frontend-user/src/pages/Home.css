@@ -203,6 +203,9 @@
 .final-actions {
   display: flex;
   justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 .final-btn {
@@ -219,6 +222,18 @@
 
 .final-btn:hover {
   transform: translateY(-2px);
+}
+
+.final-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.final-error {
+  color: #D32F2F;
+  font-weight: 600;
+  font-size: 0.95em;
 }
 
 .survey-card h2 {
