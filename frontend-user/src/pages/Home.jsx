@@ -82,7 +82,17 @@ function Home() {
     }
   }, [completions])
 
+  const handleUserInfoChange = (field, value) => {
+    setUserInfo(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
   const handleFinalConfirm = () => {
+    sessionStorage.setItem('user_name', userInfo.name)
+    sessionStorage.setItem('user_email', userInfo.email)
+    sessionStorage.setItem('user_student_id', userInfo.studentId)
     sessionStorage.removeItem('user_name')
     sessionStorage.removeItem('user_email')
     sessionStorage.removeItem('user_student_id')
