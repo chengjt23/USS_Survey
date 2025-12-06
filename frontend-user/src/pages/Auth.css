@@ -135,6 +135,14 @@
   color: inherit;
 }
 
+.auth-form select.form-input:invalid {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.auth-form select.form-input option {
+  color: #333;
+}
+
 .form-input:focus {
   outline: none;
   border-color: #667eea;
