@@ -185,7 +185,8 @@
   color: #0D47A1;
 }
 
-.final-info input {
+.final-info input,
+.final-info select {
   margin-top: 8px;
   padding: 10px 14px;
   border-radius: 10px;
@@ -195,7 +196,8 @@
   background: #f6fbff;
 }
 
-.final-info input:focus {
+.final-info input:focus,
+.final-info select:focus {
   outline: none;
   border-color: #2196F3;
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
