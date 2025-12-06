@@ -360,6 +360,110 @@
   padding: 40px;
 }
 
+.intro-section {
+  color: #0D47A1;
+  line-height: 1.8;
+}
+
+.intro-section h1 {
+  margin-bottom: 20px;
+}
+
+.intro-list {
+  margin: 20px 0;
+  padding-left: 20px;
+  color: #546E7A;
+}
+
+.intro-guide {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  border-left: 5px solid #2196F3;
+  color: #0D47A1;
+}
+
+.intro-actions {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.error-box {
+  margin-bottom: 20px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: rgba(211, 47, 47, 0.1);
+  color: #B71C1C;
+  border: 1px solid rgba(183, 28, 28, 0.3);
+  text-align: center;
+}
+
+.guide-result-card {
+  text-align: center;
+  padding: 30px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #E3F2FD 0%, #C5CAE9 100%);
+  border: 2px solid rgba(33, 150, 243, 0.2);
+  color: #0D47A1;
+}
+
+.pair-instruction {
+  text-align: center;
+  color: #1565C0;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.pair-options {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-bottom: 30px;
+}
+
+.pair-option {
+  padding: 20px;
+  border: 2px solid rgba(33, 150, 243, 0.2);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(33, 150, 243, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pair-option.selected {
+  border-color: #2196F3;
+  box-shadow: 0 12px 30px rgba(33, 150, 243, 0.25);
+}
+
+.pair-label {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #0D47A1;
+}
+
+.pair-audio {
+  width: 100%;
+}
+
+.pair-select-btn {
+  padding: 12px;
+  border: 2px solid #2196F3;
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  color: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s ease;
+}
+
+.pair-select-btn:hover {
+  transform: translateY(-2px);
+}
+
 .back-survey-btn {
   position: absolute;
   top: 60px;

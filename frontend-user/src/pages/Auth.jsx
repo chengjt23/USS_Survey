@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Auth.css'
 
@@ -6,8 +6,23 @@ function Auth() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [studentId, setStudentId] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    const pendingInfo = sessionStorage.getItem('pending_user_info')
+    if (pendingInfo) {
+      try {
+        const info = JSON.parse(pendingInfo)
+        if (info.name) setName(info.name)
+        if (info.email) setEmail(info.email)
+        if (info.studentId) setStudentId(info.studentId)
+      } catch (e) {
+        console.error('预填信息解析失败', e)
+      }
+    }
+  }, [])
 
   const shapePositions = useMemo(() => {
     return Array.from({ length: 20 }, (_, i) => ({
@@ -19,7 +34,7 @@ function Auth() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!name || !email) {
+    if (!name || !email || !studentId) {
       setError('请填写所有字段')
       return
     }
@@ -35,6 +50,8 @@ function Auth() {
     
     sessionStorage.setItem('user_name', name)
     sessionStorage.setItem('user_email', email)
+    sessionStorage.setItem('user_student_id', studentId)
+    sessionStorage.removeItem('pending_user_info')
     navigate('/')
   }
 
@@ -66,6 +83,17 @@ function Auth() {
                 placeholder="姓名"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                className="form-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                placeholder="学号"
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value)}
                 className="form-input"
                 required
               />

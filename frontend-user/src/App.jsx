@@ -8,8 +8,9 @@ import Survey3 from './pages/Survey3'
 function PrivateRoute({ children }) {
   const name = sessionStorage.getItem('user_name')
   const email = sessionStorage.getItem('user_email')
+  const studentId = sessionStorage.getItem('user_student_id')
   
-  if (!name || !email) {
+  if (!name || !email || !studentId) {
     return <Navigate to="/auth" replace />
   }
   

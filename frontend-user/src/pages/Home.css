@@ -121,6 +121,121 @@
   filter: grayscale(0.3);
 }
 
+.completed-tag {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.65);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95em;
+  letter-spacing: 1px;
+}
+
+.final-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.final-modal {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.final-modal h2 {
+  margin-bottom: 15px;
+  color: #0D47A1;
+}
+
+.final-info {
+  text-align: left;
+  margin: 25px 0;
+  line-height: 1.8;
+  color: #333;
+}
+
+.final-info span {
+  font-weight: 700;
+  color: #0D47A1;
+  margin-right: 5px;
+}
+
+.final-info label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  font-weight: 600;
+  color: #0D47A1;
+}
+
+.final-info input {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(33, 150, 243, 0.3);
+  font-size: 1em;
+  color: #0D47A1;
+  background: #f6fbff;
+}
+
+.final-info input:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
+}
+.final-actions {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.final-btn {
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  border: none;
+  color: #fff;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: 600;
+  transition: transform 0.2s ease;
+}
+
+.final-btn:hover {
+  transform: translateY(-2px);
+}
+
+.final-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.final-error {
+  color: #D32F2F;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
 .survey-card h2 {
   color: #1565C0;
   margin-bottom: 30px;
