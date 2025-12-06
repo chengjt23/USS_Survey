@@ -14,7 +14,9 @@ function Home() {
   const [userInfo, setUserInfo] = useState({
     name: '',
     email: '',
-    studentId: ''
+    studentId: '',
+    gender: '',
+    age: ''
   })
   const [finalError, setFinalError] = useState('')
 
@@ -76,7 +78,9 @@ function Home() {
       const name = sessionStorage.getItem('user_name') || ''
       const email = sessionStorage.getItem('user_email') || ''
       const studentId = sessionStorage.getItem('user_student_id') || ''
-      setUserInfo({ name, email, studentId })
+      const gender = sessionStorage.getItem('user_gender') || ''
+      const age = sessionStorage.getItem('user_age') || ''
+      setUserInfo({ name, email, studentId, gender, age })
       setShowFinalModal(true)
     } else {
       setShowFinalModal(false)
@@ -84,11 +88,15 @@ function Home() {
   }, [completions])
 
   const infoError = useMemo(() => {
-    if (!userInfo.name || !userInfo.email || !userInfo.studentId) {
+    if (!userInfo.name || !userInfo.email || !userInfo.studentId || !userInfo.gender || !userInfo.age) {
       return '请完整填写个人信息'
     }
     if (!userInfo.email.includes('@')) {
       return '邮箱格式不正确'
+    }
+    const ageNumber = Number(userInfo.age)
+    if (!Number.isFinite(ageNumber) || ageNumber <= 0) {
+      return '请输入有效的年龄'
     }
     return ''
   }, [userInfo])
@@ -113,6 +121,8 @@ function Home() {
     sessionStorage.removeItem('user_name')
     sessionStorage.removeItem('user_email')
     sessionStorage.removeItem('user_student_id')
+    sessionStorage.removeItem('user_gender')
+    sessionStorage.removeItem('user_age')
     sessionStorage.removeItem('survey_completions')
     localStorage.removeItem('survey1_progress')
     localStorage.removeItem('survey2_progress')
@@ -172,6 +182,27 @@ function Home() {
                   type="text"
                   value={userInfo.studentId}
                   onChange={(e) => handleUserInfoChange('studentId', e.target.value)}
+                />
+              </label>
+              <label>
+                <span>性别：</span>
+                <select
+                  value={userInfo.gender}
+                  onChange={(e) => handleUserInfoChange('gender', e.target.value)}
+                >
+                  <option value="">请选择</option>
+                  <option value="male">男</option>
+                  <option value="female">女</option>
+                  <option value="other">其他/不便透露</option>
+                </select>
+              </label>
+              <label>
+                <span>年龄：</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={userInfo.age}
+                  onChange={(e) => handleUserInfoChange('age', e.target.value.replace(/\D/g, ''))}
                 />
               </label>
           </div>

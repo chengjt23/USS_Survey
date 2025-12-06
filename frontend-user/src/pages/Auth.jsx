@@ -9,6 +9,8 @@ function Auth() {
   const [studentId, setStudentId] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [gender, setGender] = useState('')
+  const [age, setAge] = useState('')
 
   useEffect(() => {
     const pendingInfo = sessionStorage.getItem('pending_user_info')
@@ -18,6 +20,8 @@ function Auth() {
         if (info.name) setName(info.name)
         if (info.email) setEmail(info.email)
         if (info.studentId) setStudentId(info.studentId)
+        if (info.gender) setGender(info.gender)
+        if (info.age) setAge(String(info.age))
       } catch (e) {
         console.error('预填信息解析失败', e)
       }
@@ -34,13 +38,19 @@ function Auth() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!name || !email || !studentId) {
+    if (!name || !email || !studentId || !gender || !age) {
       setError('请填写所有字段')
       return
     }
 
     if (!email.includes('@')) {
       setError('请输入有效的邮箱地址')
+      return
+    }
+
+    const ageNumber = Number(age)
+    if (!Number.isFinite(ageNumber) || ageNumber <= 0) {
+      setError('请输入有效的年龄')
       return
     }
 
@@ -51,8 +61,10 @@ function Auth() {
     sessionStorage.setItem('user_name', name)
     sessionStorage.setItem('user_email', email)
     sessionStorage.setItem('user_student_id', studentId)
+    sessionStorage.setItem('user_gender', gender)
+    sessionStorage.setItem('user_age', String(ageNumber))
     sessionStorage.removeItem('pending_user_info')
-    navigate('/')
+    navigate('/confirm')
   }
 
   return (
@@ -105,6 +117,32 @@ function Auth() {
                 placeholder="邮箱地址"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="form-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <select
+                className="form-input"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                required
+              >
+                <option value="" disabled>性别</option>
+                <option value="male">男</option>
+                <option value="female">女</option>
+                <option value="other">其他/不便透露</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <input
+                type="number"
+                min="1"
+                placeholder="年龄"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
                 className="form-input"
                 required
               />
